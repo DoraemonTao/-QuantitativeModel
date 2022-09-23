@@ -1,16 +1,16 @@
-# This is a sample Python script.
-
-# Press ⌃R to execute it or replace it with your code.
-# Press Double ⇧ to search everywhere for classes, files, tool windows, actions, and settings.
+from extractInfo import extract_screen, extract_time
 
 
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press ⌘F8 to toggle the breakpoint.
+def parse_txt(BatteryState):
+    f = open(BatteryState,encoding = "utf-8")
+    fileContent=f.readlines()
+    f.close()
+    return fileContent
 
 
-# Press the green button in the gutter to run the script.
+
+
 if __name__ == '__main__':
-    print_hi('PyCharm')
-
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+    battery_txt = r"C:\Users\Tao\PycharmProjects\AnalyzeModule\bugreport\bugreport-PDPT00-RKQ1.200710.002-2022-09-18-09-53-22.txt"
+    fileContent=parse_txt(battery_txt)
+    print(extract_time(extract_screen(fileContent)))

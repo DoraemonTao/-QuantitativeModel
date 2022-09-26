@@ -1,8 +1,4 @@
-import bisect
-
-from Alarm import Alarm
-
-
+# 对齐模块中alarm的数据结构
 class AlarmStore:
     mAlarmBatches = []
     mSize = None

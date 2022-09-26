@@ -88,3 +88,6 @@ def extract_idle(idle_contents):
             idle_state.append([OnIdleTime,off_idle_time])
 
     return idle_state
+
+
+def extra_alarm(lines):

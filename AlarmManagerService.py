@@ -1,3 +1,17 @@
+from Alarm import Alarm
+from AlarmStore import AlarmStore
+
+
+class AlarmManager:
+    # 使用alarmstore作为我们的存储队列
+    mAlarmStore = AlarmStore()
+    def __init__(self):
+        return
+
+    # 新加入一个alarm
+    def set(self,type,when,whenElapsed,windowLength,
+                      interval):
+        alarm = Alarm(type,when,whenElapsed,windowLength,interval)
 import Constant
 from AlarmStore import AlarmStore
 
@@ -24,10 +38,19 @@ class AlarmManagerService:
 
         if (triggerAtTime < 0):
             triggerAtTime = 0
+        # 将rtc时间转化成开机时间
         nominalTrigger = convertToElapsed(triggerAtTime , type)
+        minTigger = no
+        triggerElapsed = max(minTrigger,monialTrigger)
 
 
+    def convertToElapsed(self,when,type):
+        if (isRtc(type)):
+            when -=
+        return when
 
+    def isRtc(self,type):
+        return (type == Constant.RTC | type == Constant.RTC_WAKEUP)
 
 
 

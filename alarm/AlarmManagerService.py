@@ -1,6 +1,6 @@
-from Alarm import Alarm
+from alarm.Alarm import Alarm
+import Constant
 from AlarmStore import AlarmStore
-
 
 class AlarmManager:
     # 使用alarmstore作为我们的存储队列
@@ -12,8 +12,7 @@ class AlarmManager:
     def set(self,type,when,whenElapsed,windowLength,
                       interval):
         alarm = Alarm(type,when,whenElapsed,windowLength,interval)
-import Constant
-from AlarmStore import AlarmStore
+
 
 
 class AlarmManagerService:

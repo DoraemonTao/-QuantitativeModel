@@ -1,9 +1,13 @@
 import re
 
+
 class Parse:
+    """
+        解析产生的Result文件
 
-
-
+        Args:
+            lines: the context of Result.txt
+    """
     def __init__(self,lines):
         self.lines = lines
 
@@ -26,25 +30,25 @@ class Parse:
         # jobInfo
 
 
-        # jobRegex
-        jobPropertiesRegex = {
-            self.job : "",
-            self.callingUid : "",
-            self.sourcePackageName : "",
-            self.sourceUserId : "",
-            self.standbyBucket : "",
-            self.tag : "",
-            self.numFailures : "",
-            self.earliestRunTimeElapsedMillis : "",
-            self.latestRunTimeElapsedMillis : "",
-            self.lastSuccessfulRunTime : "",
-            self.lastFailedRunTime : "",
-            self.internalFlags : ""
+        # jobPropertiesAndRegex
+        self.jobPropertiesRegex = {
+            "job"                           : ["tag=(.*)" ,self.job],
+            "callingUid"                    : ["uid=(\\d+)",self.callingUid],
+            "sourcePackageName"             : ["pkg=(.*)",self.sourcePackageName],
+            "sourceUserId"                  : ["uid=(\\d+)",self.sourceUserId],
+            "standbyBucket"                 : ["Standby bucket: (\\w+)"],
+            "tag"                           : ["tag=(.*)",self.tag],
+            "numFailures"                   : ["",self.numFailures],
+            "earliestRunTimeElapsedMillis"  : ["earliest=(.*), latest",self.],
+            "latestRunTimeElapsedMillis"    : "latest=(.*), original",
+            "lastSuccessfulRunTime"         : "Last successful run: (.*)",
+            "lastFailedRunTime"             : "Last failed run: (.*)",
+            "internalFlags"                 : ""
         }
 
 
 
-    # 每进入到一个新的job中时，清空所有属性
+    # 清空job的属性
     def clearJobProperties(self):
         self.job = None
         self.callingUid = None
@@ -117,6 +121,11 @@ class Parse:
         sourceUserIdSearch = re.search("uid=(\\d+)")
         if (sourceUserIdSearch):
             self.source
+
+        for key,value in self.jobPropertiesRegex:
+            jobSearch = re.search(self.jobPropertiesRegex[property],line)
+        jobSearch = re.search(self.jobPropertiesRegex[property],line)
+        self.c
 
 
 

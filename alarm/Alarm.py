@@ -17,13 +17,12 @@ class Alarm:
     # 在策略下需要保证的执行时间
     mPolicyWhenElapsed = []
     def __init__(self,type,when,requestedWhenElapsed,windowLength,interval
-        ,uid,pkgName):
+        ,pkgName):
         self.type = type
         self.origWhen = when
         self.mWhenElapsed = requestedWhenElapsed
         self.windowLength = windowLength
         self.repeaIinterval = interval
-        self.uid = uid
         self.mPackageName = pkgName
         self.wakeup = type == "RTC_WAKEUP" or type == "ELAPSED_REALTIME_WAKEUP"
 

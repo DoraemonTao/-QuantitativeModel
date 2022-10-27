@@ -1,7 +1,9 @@
 import re
 
 from alarm.Alarm import Alarm
+from alarm.AlarmStore import AlarmStore
 from job.JobStatus import JobStatus
+from job.JobStore import JobStore
 
 
 class Parse:
@@ -17,34 +19,6 @@ class Parse:
         # Initalize  Properties of alarm and job
         self.initJobProperties()
         self.initAlarmProperties()
-        # # Initialize jobStatus
-        # self.job = None
-        # self.callingUid = None
-        # self.sourcePackageName = None
-        # self.sourceUserId = None
-        # self.standbyBucket = None
-        # self.tag = None
-        # self.earliestRunTimeElapsedMillis = None
-        # self.latestRunTimeElapsedMillis = None
-        # self.lastSuccessfulRunTime = None
-        # self.lastFailedRunTime = None
-        #
-        # # Initialize jobInfo
-        # self.service = None
-        # self.isPersisted = None
-        # self.Periodic = None
-        # self.intervalMills = None
-        # self.flexMills = None
-        #
-        # # Initialize alarm
-        # self.type = None
-        # self.origWhen = None
-        # self.mWhenElapsed = None
-        # self.windowLength = None
-        # self.repeatInterval = None
-        # self.uid = None
-        # self.mPackageName = None
-        # self.wakeup = None
 
         # jobPropertiesAndRegex
         # jobStatus
@@ -77,10 +51,11 @@ class Parse:
             "mWhenElapsed"  :    ["whenElapsed=(.*) maxWhen",self.mWhenElapsed],
             "windowLength"  :    ["window=(.*) repeatInterval",self.windowLength],
             "repeatInterval":    ["repeatInterval=(.*) count",self.repeatInterval],
-            "uid"           :    [""],
-            "mPackageName"  :    ["Alarm{}"],
-            "wakeup"        :    []
+            "mPackageName"  :    ["Alarm{.*([a-zA-Z\\.]+)}",self.mPackageName],
         }
+
+        self.mAlarmStore = AlarmStore()
+        self.mJobStore = JobStore()
 
 
 
@@ -115,9 +90,7 @@ class Parse:
         self.mWhenElapsed = None
         self.windowLength = None
         self.repeatInterval = None
-        self.uid = None
         self.mPackageName = None
-        self.wakeup = None
 
     def parseLines(self,lines):
 
@@ -145,9 +118,10 @@ class Parse:
                         mJob = JobStatus(self.job,self.callingUid,self.sourceUserId,self.standbyBucket,
                                      self.tag,self.earliestRunTimeElapsedMillis,self.latestRunTimeElapsedMillis,
                                      self.lastFailedRunTime,self.lastFailedRunTime)
-                        self.clearJobProperties()
+                        self.mJobStore.add(mJob)
+                        self.initJobProperties()
 
-                # 查找属性
+                # 获取属性
                 self.getJobStatusProperties(line)
 
             # 到达alarm段
@@ -155,7 +129,13 @@ class Parse:
                 # 新的alarm时，将旧的job信息存储成jobStatus，随后清空属性
                 if(re.match(".*[(RTC_WAKEUP)(RTC)(ELAPSED_REALTIME_WAKEUP)(ELAPSED_REALTIME)].*",line)):
                     if(self.type is not None):
-                        mAlarm = Alarm()
+                        mAlarm = Alarm(self.type,self.origWhen,self.mWhenElapsed,
+                                       self.windowLength,self.repeatInterval,
+                                       self.mPackageName)
+                        self.mAlarmStore.add(mAlarm)
+                        self.initAlarmProperties()
+                # 获取属性
+                self.getAlarmProperties(line)
 
 
     # 采集jobStatus的信息
@@ -180,6 +160,8 @@ class Parse:
     def getAlarmProperties(self,line):
         for key,value in self.alarmPropertiesRegex:
             alarmSearch = re.search(value[0],line)
+            if (alarmSearch):
+                value[1] = alarmSearch.gruop(1)
 
 
 

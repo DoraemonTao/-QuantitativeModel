@@ -6,13 +6,10 @@ class JobStatus:
                  sourceUserId,
                  standbyBucket,
                  tag,
-                 numFailures,
                  earliestRunTimeElapsedMillis,
                  latestRunTimeElapsedMillis,
                  lastSuccessfulRunTime,
                  lastFailedRunTime,
-                 internalFlags,
-                 dynamicConstraints
                  ):
         self.job = job
         self.calling = callingUid
@@ -24,13 +21,8 @@ class JobStatus:
         self.earliestRunTimeElapsedMillis = earliestRunTimeElapsedMillis
         self.latestRunTimeElapsedMillis = latestRunTimeElapsedMillis
         self.mOriginalLatestRunTimeElapsedMillis = latestRunTimeElapsedMillis
-        self.numFailures = numFailures
         self.sourcePackageName = sourcePackageName
 
         self.mLastSuccessfulRunTime = lastSuccessfulRunTime
         self.mLastFailedRunTime = lastFailedRunTime
 
-        self.mInternalFlags = internalFlags
-
-        self.dynamicConstraints = dynamicConstraints
-        self.dynamicConstraints = dynamicConstraints

@@ -1,5 +1,8 @@
 import re
 
+from alarm.Alarm import Alarm
+from job.JobStatus import JobStatus
+
 
 class Parse:
     """
@@ -20,30 +23,35 @@ class Parse:
         self.sourceUserId = None
         self.standbyBucket = None
         self.tag = None
-        self.numFailures = None
         self.earliestRunTimeElapsedMillis = None
         self.latestRunTimeElapsedMillis = None
         self.lastSuccessfulRunTime = None
         self.lastFailedRunTime = None
-        self.internalFlags = None
 
         # jobInfo
 
 
         # jobPropertiesAndRegex
-        self.jobPropertiesRegex = {
+        # jobStatus
+        self.jobStatusPropertiesRegex = {
             "job"                           : ["tag=(.*)" ,self.job],
             "callingUid"                    : ["uid=(\\d+)",self.callingUid],
             "sourcePackageName"             : ["pkg=(.*)",self.sourcePackageName],
             "sourceUserId"                  : ["uid=(\\d+)",self.sourceUserId],
             "standbyBucket"                 : ["Standby bucket: (\\w+)"],
             "tag"                           : ["tag=(.*)",self.tag],
-            "numFailures"                   : ["",self.numFailures],
-            "earliestRunTimeElapsedMillis"  : ["earliest=(.*), latest",self.],
-            "latestRunTimeElapsedMillis"    : "latest=(.*), original",
-            "lastSuccessfulRunTime"         : "Last successful run: (.*)",
-            "lastFailedRunTime"             : "Last failed run: (.*)",
-            "internalFlags"                 : ""
+            "earliestRunTimeElapsedMillis"  : ["earliest=(.*), latest",self.earliestRunTimeElapsedMillis],
+            "latestRunTimeElapsedMillis"    : ["latest=(.*), original",self.latestRunTimeElapsedMillis],
+            "lastSuccessfulRunTime"         : ["Last successful run: (.*)",self.lastSuccessfulRunTime],
+            "lastFailedRunTime"             : ["Last failed run: (.*)",self.lastFailedRunTime],
+        }
+        # jobInfo
+        self.jobInfoPropertiesRegex = {
+            "service"        :   ["Service: (.*)",self.service],
+            "isPersisted"    :   ["(PERSISTED)",self.isPersisted],
+            "isPeriodic"     :   ["(PERIODIC:)",self.isPersisted],
+            "intervalMills"  :   ["interval=(.*) flex",self.intervalMills],
+            "flexMills"      :   ["flex=(.*)",self.flexMills]
         }
 
 
@@ -56,12 +64,10 @@ class Parse:
         self.sourceUserId = None
         self.standbyBucket = None
         self.tag = None
-        self.numFailures = None
         self.earliestRunTimeElapsedMillis = None
         self.latestRunTimeElapsedMillis = None
         self.lastSuccessfulRunTime = None
         self.lastFailedRunTime = None
-        self.internalFlags = None
 
     # 清空alarm的属性
     def clearAlarmProperties(self):
@@ -79,53 +85,54 @@ class Parse:
             if not jobContentFlag:
                 jobContentFlag = re.search("Job History:", line)
 
+            # 是否到达alarm段
+            if not alarmContentFlag:
+                alarmContentFlag = re.search("Alarm History", line)
+                if (alarmContentFlag):
+                    jobContentFlag = False
+
             # 到达job段
             if (jobContentFlag):
-                # 新的job时，清空属性
+                # 新的job时，将旧的job信息存储成jobStatus和jobInfo，随后清空属性
                 if (re.match("  JOB #", line)):
-                    self.clearJobProperties()
+                    if(self.job is not None):
+                        mJob = JobStatus(self.job,self.callingUid,self.sourceUserId,self.standbyBucket,
+                                     self.tag,self.earliestRunTimeElapsedMillis,self.latestRunTimeElapsedMillis,
+                                     self.lastFailedRunTime,self.lastFailedRunTime)
+                        self.clearJobProperties()
 
                 # 查找属性
                 self.getJobStatusProperties(line)
 
-
-            # 是否达到alarm段
-            if not alarmContentFlag:
-                alarmContentFlag = re.search("Alarm History:", line)
-                jobContentFlag = not re.search("Alarm History:", line)
-
-            # 逐段分析
-            # 达到job段
-            if jobContentFlag:
-                jobStatus = jobStatus(package, interval, flex, )
-            # 构建jobStatus最小单位
-
             # 到达alarm段
             if alarmContentFlag:
+                # 新的alarm时，将旧的job信息存储成jobStatus，随后清空属性
+                if(re.match(".*[(RTC_WAKEUP)(RTC)(ELAPSED_REALTIME_WAKEUP)(ELAPSED_REALTIME)].*",line)):
+                    if(self.type is not None):
+                        mAlarm = Alarm()
 
 
-
+    # 采集jobStatus的信息
     def getJobStatusProperties(self,line):
-        tagSearch = re.search("tag=(.*)", line)
-        if (tagSearch):
-            self.tag = tagSearch.group(1)
+        for key,value in self.jobStatusPropertiesRegex:
+            jobSearch = re.search(value[0],line)
+            if(jobSearch):
+                value[1] = jobSearch.gruop(1)
 
-        callingUidSearch = re.search("uid=(\\d+)", line)
-        if (callingUidSearch):
-            self.callingUid = callingUidSearch.group(1)
+        for key,value in self.jobInfoPropertiesRegex:
+            jobSearch = re.search(value[0], line)
+            if (key is "isPersisted" or "isPeriodic"):
+                if (jobSearch):
+                    value[1] = True
+                else:
+                    value[1] = False
+            else:
+                if (jobSearch):
+                    value[1] = jobSearch.gruop(1)
 
-        sourcePackageNameSearch = re.search("pkg=(.*)")
-        if (sourcePackageNameSearch):
-            self.sourcePackageName = sourcePackageNameSearch.group(1)
+    # 采集alarm的信息
+    def getAlarmProperties(self,line):
 
-        sourceUserIdSearch = re.search("uid=(\\d+)")
-        if (sourceUserIdSearch):
-            self.source
-
-        for key,value in self.jobPropertiesRegex:
-            jobSearch = re.search(self.jobPropertiesRegex[property],line)
-        jobSearch = re.search(self.jobPropertiesRegex[property],line)
-        self.c
 
 
 

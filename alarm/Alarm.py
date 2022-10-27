@@ -16,13 +16,17 @@ class Alarm:
     mMaxWhenElapsed = None
     # 在策略下需要保证的执行时间
     mPolicyWhenElapsed = []
-    def __init__(self,type,requestedWhenElapsed,windowLength,interval
-        ,packageName,wakeup):
+    def __init__(self,type,when,requestedWhenElapsed,windowLength,interval
+        ,uid,pkgName,wakeup):
+        self.type = type
+        self.origWhen = when
         self.mWhenElapsed = requestedWhenElapsed
         self.windowLength = windowLength
         self.repeatinterval = interval
-        self.mPackageName = packageName
-        self.wakeup = type
+        self.uid = uid
+        self.mPackageName = pkgName
+        self.wakeup = type == "RTC_WAKEUP" or type == "ELAPSED_REALTIME_WAKEUP"
+
 
     def getWhenElapsed(self):
         return self.mWhenElapsed

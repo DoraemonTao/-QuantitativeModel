@@ -14,22 +14,37 @@ class Parse:
     def __init__(self,lines):
         self.lines = lines
 
-        # job属性  jobStatus以及jobInfo
-
-        # jobStatus
-        self.job = None
-        self.callingUid = None
-        self.sourcePackageName = None
-        self.sourceUserId = None
-        self.standbyBucket = None
-        self.tag = None
-        self.earliestRunTimeElapsedMillis = None
-        self.latestRunTimeElapsedMillis = None
-        self.lastSuccessfulRunTime = None
-        self.lastFailedRunTime = None
-
-        # jobInfo
-
+        # Initalize  Properties of alarm and job
+        self.initJobProperties()
+        self.initAlarmProperties()
+        # # Initialize jobStatus
+        # self.job = None
+        # self.callingUid = None
+        # self.sourcePackageName = None
+        # self.sourceUserId = None
+        # self.standbyBucket = None
+        # self.tag = None
+        # self.earliestRunTimeElapsedMillis = None
+        # self.latestRunTimeElapsedMillis = None
+        # self.lastSuccessfulRunTime = None
+        # self.lastFailedRunTime = None
+        #
+        # # Initialize jobInfo
+        # self.service = None
+        # self.isPersisted = None
+        # self.Periodic = None
+        # self.intervalMills = None
+        # self.flexMills = None
+        #
+        # # Initialize alarm
+        # self.type = None
+        # self.origWhen = None
+        # self.mWhenElapsed = None
+        # self.windowLength = None
+        # self.repeatInterval = None
+        # self.uid = None
+        # self.mPackageName = None
+        # self.wakeup = None
 
         # jobPropertiesAndRegex
         # jobStatus
@@ -49,15 +64,29 @@ class Parse:
         self.jobInfoPropertiesRegex = {
             "service"        :   ["Service: (.*)",self.service],
             "isPersisted"    :   ["(PERSISTED)",self.isPersisted],
-            "isPeriodic"     :   ["(PERIODIC:)",self.isPersisted],
+            "isPeriodic"     :   ["(PERIODIC:)",self.isPeriodic],
             "intervalMills"  :   ["interval=(.*) flex",self.intervalMills],
             "flexMills"      :   ["flex=(.*)",self.flexMills]
+        }
+
+        # ALarmPropertiesAndRegex
+        # Alarm
+        self.alarmPropertiesRegex = {
+            "type"          :    [".*[(RTC_WAKEUP)(RTC)(ELAPSED_REALTIME_WAKEUP)(ELAPSED_REALTIME)].*",self.type],
+            "origWhen"      :    ["origWhen=(.*) window",self.origWhen],
+            "mWhenElapsed"  :    ["whenElapsed=(.*) maxWhen",self.mWhenElapsed],
+            "windowLength"  :    ["window=(.*) repeatInterval",self.windowLength],
+            "repeatInterval":    ["repeatInterval=(.*) count",self.repeatInterval],
+            "uid"           :    [""],
+            "mPackageName"  :    ["Alarm{}"],
+            "wakeup"        :    []
         }
 
 
 
     # 清空job的属性
-    def clearJobProperties(self):
+    def initJobProperties(self):
+        # Initialize jobStatus
         self.job = None
         self.callingUid = None
         self.sourcePackageName = None
@@ -69,9 +98,26 @@ class Parse:
         self.lastSuccessfulRunTime = None
         self.lastFailedRunTime = None
 
+        # Initialize jobInfo
+        self.service = None
+        self.isPersisted = None
+        self.Periodic = None
+        self.intervalMills = None
+        self.flexMills = None
+
+
+
     # 清空alarm的属性
-    def clearAlarmProperties(self):
-        self. = None
+    def initAlarmProperties(self):
+        # Initialize Alarm
+        self.type = None
+        self.origWhen = None
+        self.mWhenElapsed = None
+        self.windowLength = None
+        self.repeatInterval = None
+        self.uid = None
+        self.mPackageName = None
+        self.wakeup = None
 
     def parseLines(self,lines):
 
@@ -132,6 +178,8 @@ class Parse:
 
     # 采集alarm的信息
     def getAlarmProperties(self,line):
+        for key,value in self.alarmPropertiesRegex:
+            alarmSearch = re.search(value[0],line)
 
 
 

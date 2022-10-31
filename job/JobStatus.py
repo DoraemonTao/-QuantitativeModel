@@ -25,4 +25,3 @@ class JobStatus:
 
         self.mLastSuccessfulRunTime = lastSuccessfulRunTime
         self.mLastFailedRunTime = lastFailedRunTime
-

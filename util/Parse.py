@@ -2,6 +2,8 @@ import re
 
 from alarm.Alarm import Alarm
 from alarm.AlarmStore import AlarmStore
+from alarm.BatchingAlarmStore import BatchingAlarmStore
+from job.JobInfo import JobInfo
 from job.JobStatus import JobStatus
 from job.JobStore import JobStore
 
@@ -16,45 +18,44 @@ class Parse:
     def __init__(self,lines):
         self.lines = lines
 
-        # Initalize  Properties of alarm and job
-        self.initJobProperties()
-        self.initAlarmProperties()
-
         # jobPropertiesAndRegex
         # jobStatus
         self.jobStatusPropertiesRegex = {
-            "job"                           : ["tag=(.*)" ,self.job],
-            "callingUid"                    : ["uid=(\\d+)",self.callingUid],
-            "sourcePackageName"             : ["pkg=(.*)",self.sourcePackageName],
-            "sourceUserId"                  : ["uid=(\\d+)",self.sourceUserId],
-            "standbyBucket"                 : ["Standby bucket: (\\w+)"],
-            "tag"                           : ["tag=(.*)",self.tag],
-            "earliestRunTimeElapsedMillis"  : ["earliest=(.*), latest",self.earliestRunTimeElapsedMillis],
-            "latestRunTimeElapsedMillis"    : ["latest=(.*), original",self.latestRunTimeElapsedMillis],
-            "lastSuccessfulRunTime"         : ["Last successful run: (.*)",self.lastSuccessfulRunTime],
-            "lastFailedRunTime"             : ["Last failed run: (.*)",self.lastFailedRunTime],
+            "callingUid"                    : ["uid=(\\d+)",None],
+            "sourcePackageName"             : ["pkg=(.+)",None],
+            "sourceUserId"                  : ["uid=(\\d+)",None],
+            "standbyBucket"                 : ["Standby bucket: (\\w+)",None],
+            "tag"                           : ["tag=(.+)",None],
+            "earliestRunTimeElapsedMillis"  : ["earliest=(.+), latest",None],
+            "latestRunTimeElapsedMillis"    : ["latest=(.+), original",None],
+            "lastSuccessfulRunTime"         : ["Last successful run: (.+)",None],
+            "lastFailedRunTime"             : ["Last failed run: (.+)",None],
         }
         # jobInfo
         self.jobInfoPropertiesRegex = {
-            "service"        :   ["Service: (.*)",self.service],
-            "isPersisted"    :   ["(PERSISTED)",self.isPersisted],
-            "isPeriodic"     :   ["(PERIODIC:)",self.isPeriodic],
-            "intervalMills"  :   ["interval=(.*) flex",self.intervalMills],
-            "flexMills"      :   ["flex=(.*)",self.flexMills]
+            "service"        :   ["Service: (.+)",None],
+            "isPersisted"    :   ["(PERSISTED)",None],
+            "isPeriodic"     :   ["(PERIODIC:)",None],
+            "intervalMills"  :   ["interval=(.+) flex",None],
+            "flexMills"      :   ["flex=(.+)",None]
         }
 
         # ALarmPropertiesAndRegex
         # Alarm
         self.alarmPropertiesRegex = {
-            "type"          :    [".*[(RTC_WAKEUP)(RTC)(ELAPSED_REALTIME_WAKEUP)(ELAPSED_REALTIME)].*",self.type],
-            "origWhen"      :    ["origWhen=(.*) window",self.origWhen],
-            "mWhenElapsed"  :    ["whenElapsed=(.*) maxWhen",self.mWhenElapsed],
-            "windowLength"  :    ["window=(.*) repeatInterval",self.windowLength],
-            "repeatInterval":    ["repeatInterval=(.*) count",self.repeatInterval],
-            "mPackageName"  :    ["Alarm{.*([a-zA-Z\\.]+)}",self.mPackageName],
+            "type"          :    [".*((RTC_WAKEUP)|(RTC)|(ELAPSED_REALTIME_WAKEUP)|(ELAPSED_REALTIME)).*",None],
+            "origWhen"      :    ["origWhen=(.+) window",None],
+            "mWhenElapsed"  :    ["whenElapsed=(.+) maxWhen",None],
+            "windowLength"  :    ["window=(\\d+) ",None],
+            "repeatInterval":    ["repeatInterval=(\\d+) ",None],
+            "flag"          :    ["flags=(0x\\d+)",None],
+            "mPackageName"  :    ["Alarm{.*\\d+ ([a-zA-Z\\.]+)}",None],
+            "mMaxWhenElapsed":   ["maxWhenElapsed=(\\d+)",None],
+            "requester"     :    ["requester=(\\d+) ",None],
+            "app_standby"   :    ["app_standby=(\\d+) ",None]
         }
 
-        self.mAlarmStore = AlarmStore()
+        self.mAlarmStore = BatchingAlarmStore()
         self.mJobStore = JobStore()
 
 
@@ -62,44 +63,50 @@ class Parse:
     # 清空job的属性
     def initJobProperties(self):
         # Initialize jobStatus
-        self.job = None
-        self.callingUid = None
-        self.sourcePackageName = None
-        self.sourceUserId = None
-        self.standbyBucket = None
-        self.tag = None
-        self.earliestRunTimeElapsedMillis = None
-        self.latestRunTimeElapsedMillis = None
-        self.lastSuccessfulRunTime = None
-        self.lastFailedRunTime = None
-
-        # Initialize jobInfo
-        self.service = None
-        self.isPersisted = None
-        self.Periodic = None
-        self.intervalMills = None
-        self.flexMills = None
+        for key,value in self.jobInfoPropertiesRegex.items():
+            value[1] = None
+        for key,value in self.jobStatusPropertiesRegex.items():
+            value[1] = None
+        # self.job = None
+        # self.callingUid = None
+        # self.sourcePackageName = None
+        # self.sourceUserId = None
+        # self.standbyBucket = None
+        # self.tag = None
+        # self.earliestRunTimeElapsedMillis = None
+        # self.latestRunTimeElapsedMillis = None
+        # self.lastSuccessfulRunTime = None
+        # self.lastFailedRunTime = None
+        #
+        # # Initialize jobInfo
+        # self.service = None
+        # self.isPersisted = None
+        # self.isPeriodic = None
+        # self.intervalMills = None
+        # self.flexMills = None
 
 
 
     # 清空alarm的属性
     def initAlarmProperties(self):
         # Initialize Alarm
-        self.type = None
-        self.origWhen = None
-        self.mWhenElapsed = None
-        self.windowLength = None
-        self.repeatInterval = None
-        self.mPackageName = None
+        for key,value in self.alarmPropertiesRegex.items():
+            value[1] = None
+        # self.type = None
+        # self.origWhen = None
+        # self.mWhenElapsed = None
+        # self.windowLength = None
+        # self.repeatInterval = None
+        # self.mPackageName = None
 
-    def parseLines(self,lines):
+    def parseLines(self):
 
         # 相应段的Flag标志位
         alarmContentFlag = False
         jobContentFlag = False
 
         # 逐行分析
-        for line in lines:
+        for line in self.lines:
             # 是否到达job段
             if not jobContentFlag:
                 jobContentFlag = re.search("Job History:", line)
@@ -114,10 +121,16 @@ class Parse:
             if (jobContentFlag):
                 # 新的job时，将旧的job信息存储成jobStatus和jobInfo，随后清空属性
                 if (re.match("  JOB #", line)):
-                    if(self.job is not None):
-                        mJob = JobStatus(self.job,self.callingUid,self.sourceUserId,self.standbyBucket,
-                                     self.tag,self.earliestRunTimeElapsedMillis,self.latestRunTimeElapsedMillis,
-                                     self.lastFailedRunTime,self.lastFailedRunTime)
+                    if(self.jobInfoPropertiesRegex['service'] is not None):
+                        jobinfo = JobInfo(self.jobInfoPropertiesRegex['service'][1],self.jobInfoPropertiesRegex['isPersisted'][1],
+                                      self.jobInfoPropertiesRegex['isPeriodic'][1],self.jobInfoPropertiesRegex['intervalMills'][1],
+                                      self.jobInfoPropertiesRegex['flexMills'][1])
+                        mJob = JobStatus(jobinfo,
+                                         self.jobStatusPropertiesRegex['callingUid'][1],self.jobStatusPropertiesRegex['sourcePackageName'][1],
+                                         self.jobStatusPropertiesRegex['sourceUserId'][1],self.jobStatusPropertiesRegex['standbyBucket'][1],
+                                         self.jobStatusPropertiesRegex['tag'][1],self.jobStatusPropertiesRegex['earliestRunTimeElapsedMillis'][1],
+                                         self.jobStatusPropertiesRegex['latestRunTimeElapsedMillis'][1],self.jobStatusPropertiesRegex['lastSuccessfulRunTime'][1],
+                                         self.jobStatusPropertiesRegex['lastFailedRunTime'][1])
                         self.mJobStore.add(mJob)
                         self.initJobProperties()
 
@@ -127,11 +140,13 @@ class Parse:
             # 到达alarm段
             if alarmContentFlag:
                 # 新的alarm时，将旧的job信息存储成jobStatus，随后清空属性
-                if(re.match(".*[(RTC_WAKEUP)(RTC)(ELAPSED_REALTIME_WAKEUP)(ELAPSED_REALTIME)].*",line)):
-                    if(self.type is not None):
-                        mAlarm = Alarm(self.type,self.origWhen,self.mWhenElapsed,
-                                       self.windowLength,self.repeatInterval,
-                                       self.mPackageName)
+                if(re.match(".*((RTC_WAKEUP)|(RTC)|(ELAPSED)|(ELAPSED_WAKEUP)).*",line)):
+                    if(self.alarmPropertiesRegex['origWhen'][1] is not None):
+                        mAlarm = Alarm(self.alarmPropertiesRegex['type'][1],self.alarmPropertiesRegex['origWhen'][1],
+                                       int(self.alarmPropertiesRegex['mWhenElapsed'][1]),self.alarmPropertiesRegex["windowLength"][1],
+                                       self.alarmPropertiesRegex['repeatInterval'][1],self.alarmPropertiesRegex['flag'][1],
+                                       self.alarmPropertiesRegex['mPackageName'][1],int(self.alarmPropertiesRegex['mMaxWhenElapsed'][1]),
+                                       self.alarmPropertiesRegex['requester'][1],self.alarmPropertiesRegex['app_standby'][1])
                         self.mAlarmStore.add(mAlarm)
                         self.initAlarmProperties()
                 # 获取属性
@@ -140,36 +155,35 @@ class Parse:
 
     # 采集jobStatus的信息
     def getJobStatusProperties(self,line):
-        for key,value in self.jobStatusPropertiesRegex:
+        for key,value in self.jobStatusPropertiesRegex.items():
             jobSearch = re.search(value[0],line)
             if(jobSearch):
-                value[1] = jobSearch.gruop(1)
+                value[1] = jobSearch.group(1)
 
-        for key,value in self.jobInfoPropertiesRegex:
+        for key,value in self.jobInfoPropertiesRegex.items():
             jobSearch = re.search(value[0], line)
-            if (key is "isPersisted" or "isPeriodic"):
+            if (key == "isPersisted" or key == "isPeriodic"):
                 if (jobSearch):
                     value[1] = True
                 else:
                     value[1] = False
             else:
                 if (jobSearch):
-                    value[1] = jobSearch.gruop(1)
+                    value[1] = jobSearch.group(1)
 
     # 采集alarm的信息
     def getAlarmProperties(self,line):
-        for key,value in self.alarmPropertiesRegex:
+        for key,value in self.alarmPropertiesRegex.items():
             alarmSearch = re.search(value[0],line)
             if (alarmSearch):
-                value[1] = alarmSearch.gruop(1)
+                value[1] = alarmSearch.group(1)
 
 
+    def getAlarmStore(self):
+        return self.mAlarmStore
 
-
-
-
-
-
+    def getJobStore(self):
+        return self.mJobStore
 
 
 
@@ -260,4 +274,3 @@ def extract_idle(idle_contents):
     return idle_state
 
 
-def extra_alarm(lines):

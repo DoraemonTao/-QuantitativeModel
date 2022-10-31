@@ -1,4 +1,4 @@
-from util.Parse import extract_screen, extract_time
+from util.Parse import extract_screen, extract_time, Parse
 
 
 def parse_txt(BatteryState):
@@ -11,6 +11,10 @@ def parse_txt(BatteryState):
 
 
 if __name__ == '__main__':
-    battery_txt = r"data/result.txt"
+    battery_txt = r"data/result.log"
     fileContent=parse_txt(battery_txt)
-    print(extract_time(extract_screen(fileContent)))
+    parse = Parse(fileContent);
+    parse.parseLines();
+    mAlarm = parse.getAlarmStore()
+    mJob = parse.getJobStore()
+    # TODO:将alarm和job放入idle状态中更新

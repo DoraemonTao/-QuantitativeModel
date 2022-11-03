@@ -24,16 +24,18 @@ class Alarm:
     # 在策略下需要保证的执行时间
     mPolicyWhenElapsed = []
     def __init__(self,type,when,requestedWhenElapsed,windowLength,interval
-        ,flag,pkgName,maxWhenElapsed,requester,app_standby):
+        ,flags,pkgName,maxWhenElapsed,requester,app_standby):
         self.type = type
         self.origWhen = when
         self.mWhenElapsed = requestedWhenElapsed
         self.windowLength = windowLength
         self.repeatInterval = interval
-        self.flag = flag
+        self.flags = flags
         self.mPackageName = pkgName
         self.wakeup = type == "RTC_WAKEUP" or type == "ELAPSED_REALTIME_WAKEUP"
         self.mMaxWhenElapsed = maxWhenElapsed
+        self.mPolicyWhenElapsed[self.REQUESTER_POLICY_INDEX] = requester
+        self.mPolicyWhenElapsed[self.APP_STANDBY_POLICY_INDEX] = app_standby
 
 
 
@@ -63,6 +65,6 @@ class Alarm:
         return self.mMaxWhenElapsed
 
     def getFlag(self):
-        return self.flag
+        return self.flags
 
 

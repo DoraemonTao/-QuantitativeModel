@@ -67,6 +67,15 @@ class BatchingAlarmStore:
 
         return -1
 
+    def updateAlarmDeliveries(self):
+
+    def rebatchAllAlarms(self):
+        oldBatches = self.mAlarmBatches
+        self.mAlarmBatches = None
+        for batch in oldBatches:
+            for i in range(len(batch)):
+                self.insertAndBatchAlarm(batch[i])
+
 class Batch:
     mStart = None
     mEnd = None

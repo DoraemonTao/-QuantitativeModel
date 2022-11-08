@@ -1,14 +1,27 @@
 from alarm.Alarm import Alarm
-import Constant
 from AlarmStore import AlarmStore
 from AlarmManager import *
+from alarm.BatchingAlarmStore import BatchingAlarmStore
 
 
 class AlarmManagerService:
-    mALarmStore = None
 
-    def __init__(self,alarmStore):
-        self.mAlarmStore = alarmStore
+    def __init__(self):
+        self.mAlarmStore = BatchingAlarmStore()
+
+    # 将当前时间移至当前，删除store中执行的batch
+    def setTime(self,alarm):
+        # 删除当前时间前的batch
+        deleteBatch(alarm.getWhenElapsed())
+
+
+
+    # 调度alarm
+    def set(self,a):
+        # 时间移至当前alarm进入时间
+        setTime(a)
+        if (a.flags & FLAG_IDLE_UNTIL) != 0:
+            self.adjustIdleUntilTime(a)
 
     # TODO:更新idlePolicy下的Elapsed
     def adjustDeliveryTimeBasedOnDeviceIdle(self, alarm):
@@ -21,10 +34,25 @@ class AlarmManagerService:
             deviceIdlePolicyTime = nowElapsed
         elif ((alarm.flags & FLAG_PRIORITIZE) != 0) :
 
+
+        return deviceIdlePolicyTime
+
     # 指定的alamr有compat标识
     def isAllowedWhileIdleRestricted(self,alarm):
         return alarm.flags & (FLAG_ALLOW_WHILE_IDLE | FLAG_ALLOW_WHILE_IDLE_COMPAT) !=0
 
+    # 只有能够置device为idle状态的才能够调用，同时判断是否有wakeup类型的alarm，提前唤醒device
+    def adjustIdleUntilTime(self,alarm):
+        if(alarm.flags & FLAG_IDLE_UNTIL) == 0:
+            return False
+        changedBeforeFuzz = False
+        if (self.mAlarmStore == None):
+
+
+    def deleteBatch(self,time):
+        while(self.mAlarmStore.getNextDeliveryTime() < time):
+            self.mAlarmStore.mAlarmBatches.removeBatch(0)
+            self.mNextWakeFromIdle = self.mAlarmStore.getNextWakeFromIdleAlarm()
     # def set(self,callingPackage , type, triggerAtTime, windowLength, interval, flags,):
     #     if(flags & Constant.FLAG_IDLE_UNTIL !=0):
     #         windowLength = 0

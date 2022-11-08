@@ -1,3 +1,4 @@
+from AlarmManager import *
 # 对齐模块中alarm的数据结构
 class BatchingAlarmStore:
     mAlarmBatches = []
@@ -20,6 +21,11 @@ class BatchingAlarmStore:
     def remove(self):
         return
 
+    def removeBatch(self,index):
+        self.mSize -= len(self.mAlarmBatches[index])
+        self.mAlarmBatches.pop(index)
+
+
     def rebatchAllAlarms(self):
         oldBatched = self.mAlarmBatches
         self.mAlarmBatches = []
@@ -34,6 +40,16 @@ class BatchingAlarmStore:
     def getNextDeliveryTime(self):
         if len(self.mAlarmBatches):
             return self.mAlarmBatches[0].mStart
+
+    def getNextWakeFromIdleAlarm(self):
+        for batch in self.mAlarmBatches:
+            if(batch.mFlags & FLAG_WAKE_FROM_IDLE == 0):
+                continue
+            for i in range(len(batch)):
+                a = batch.get(i)
+                if (a.flags & FLAG_WAKE_FROM_IDLE !=0 ):
+                    return a
+        return None
 
     # 将alarm插入至合适的batch中
     def insertAndBatchAlarm(self, alarm):
@@ -67,7 +83,16 @@ class BatchingAlarmStore:
 
         return -1
 
-    def updateAlarmDeliveries(self):
+
+    def updateAlarmDeliveries(self,fun):
+        changed = False
+        for b in self.mAlarmBatches:
+            for i in range(len(b)):
+                # 匿名函数，由调用者定义函数方法
+                changed |= fun(b[i])
+        if changed:
+            self.rebatchAllAlarms()
+        return changed
 
     def rebatchAllAlarms(self):
         oldBatches = self.mAlarmBatches

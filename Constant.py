@@ -15,10 +15,7 @@ INTERVAL_HALF_DAY = 12*INTERVAL_HOUR
 INTERVAL_DAY = 2*INTERVAL_HALF_DAY
 
 
-# 在idle状态下能够唤醒
-FLAG_IDLE_UNTIL = 1<<1
-# 不能被batch，需要新开一个batch
-FLAG_STAND_ALONE = 1<<2
+
 
 # alarm的最小时间间隔
 MIN_INTERVAL = 60*1000

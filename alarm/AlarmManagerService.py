@@ -1,5 +1,6 @@
 from alarm.Alarm import Alarm
 from AlarmStore import AlarmStore
+from util.Constant import *
 from AlarmManager import *
 from alarm.BatchingAlarmStore import BatchingAlarmStore
 
@@ -46,42 +47,18 @@ class AlarmManagerService:
         if(alarm.flags & FLAG_IDLE_UNTIL) == 0:
             return False
         changedBeforeFuzz = False
-        if (self.mAlarmStore == None):
-
+        if (self.mNextWakeFromIdle == None):
+            return changedBeforeFuzz
+        upcomingWakeFromIdle = self.mNextWakeFromIdle.getWhenElapsed()
+        # 添加模糊时间，在这段模糊时间中，唤醒时间按照alarm
+        if (alarm.getWhenElapsed() <(upcomingWakeFromIdle - MIN_DEVICE_IDLE_FUZZ)):
+            return changedBeforeFuzz
+        if (upcomingWakeFromIdle <= alarm.get)
 
     def deleteBatch(self,time):
         while(self.mAlarmStore.getNextDeliveryTime() < time):
             self.mAlarmStore.mAlarmBatches.removeBatch(0)
             self.mNextWakeFromIdle = self.mAlarmStore.getNextWakeFromIdleAlarm()
-    # def set(self,callingPackage , type, triggerAtTime, windowLength, interval, flags,):
-    #     if(flags & Constant.FLAG_IDLE_UNTIL !=0):
-    #         windowLength = 0
-    #     exact = (windowLength == 0)
-    #     if(exact):
-    #         flags |= Constant.FLAG_STAND_ALONE
-    #
-    #     # interval合法性检查
-    #     minInterval = Constant.MIN_INTERVAL
-    #     if (interval >0 & interval < minInterval):
-    #         interval = minInterval
-    #     elif (interval > Constant.MAX_INTERVAL):
-    #         interval = Constant.MAX_INTERVAL
-    #
-    #     if (triggerAtTime < 0):
-    #         triggerAtTime = 0
-    #     # 将rtc时间转化成开机时间
-    #     nominalTrigger = convertToElapsed(triggerAtTime , type)
-    #     minTigger = no
-    #     triggerElapsed = max(minTrigger,monialTrigger)
-
-
-    # def convertToElapsed(self,when,type):
-    #     if (isRtc(type)):
-    #         when -=
-    #     return when
-
-    # def isRtc(self,type):
-    #     return (type == Constant.RTC | type == Constant.RTC_WAKEUP)
 
 
 

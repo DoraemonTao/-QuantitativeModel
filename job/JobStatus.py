@@ -1,6 +1,5 @@
 class JobStatus:
     def __init__(self,
-                 job,
                  callingUid,
                  sourcePackageName,
                  sourceUserId,
@@ -10,8 +9,12 @@ class JobStatus:
                  latestRunTimeElapsedMillis,
                  lastSuccessfulRunTime,
                  lastFailedRunTime,
+                 isPeriodic,
+                 isPersisted,
+                 intervalMills,
+                 flexMills
                  ):
-        self.job = job
+
         self.calling = callingUid
         self.standbyBucket = standbyBucket
 
@@ -25,3 +28,8 @@ class JobStatus:
 
         self.mLastSuccessfulRunTime = lastSuccessfulRunTime
         self.mLastFailedRunTime = lastFailedRunTime
+
+        self.isPeriodic = isPeriodic
+        self.isPersisted = isPersisted
+        self.intervalMills = intervalMills
+        self.flexMills = flexMills

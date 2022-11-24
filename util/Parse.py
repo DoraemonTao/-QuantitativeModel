@@ -1,11 +1,8 @@
 import re
 
-from alarm.Alarm import Alarm
-from alarm.AlarmStore import AlarmStore
-from alarm.BatchingAlarmStore import BatchingAlarmStore
-from job.JobInfo import JobInfo
-from job.JobStatus import JobStatus
-from job.JobStore import JobStore
+from alarm import Alarm
+from job import JobInfo
+from job import JobStatus
 
 
 class Parse:
@@ -55,8 +52,8 @@ class Parse:
             "app_standby"   :    ["app_standby=(\\d+) ",None]
         }
 
-        self.mAlarmStore = BatchingAlarmStore()
-        self.mJobStore = JobStore()
+        self.mAlarmStore = []
+        self.mJobStore = []
 
 
 
@@ -67,7 +64,7 @@ class Parse:
             value[1] = None
         for key,value in self.jobStatusPropertiesRegex.items():
             value[1] = None
-        # self.job = None
+        # self.j = None
         # self.callingUid = None
         # self.sourcePackageName = None
         # self.sourceUserId = None
@@ -131,7 +128,7 @@ class Parse:
                                          self.jobStatusPropertiesRegex['tag'][1],self.jobStatusPropertiesRegex['earliestRunTimeElapsedMillis'][1],
                                          self.jobStatusPropertiesRegex['latestRunTimeElapsedMillis'][1],self.jobStatusPropertiesRegex['lastSuccessfulRunTime'][1],
                                          self.jobStatusPropertiesRegex['lastFailedRunTime'][1])
-                        self.mJobStore.add(mJob)
+                        self.mJobStore.append(mJob)
                         self.initJobProperties()
 
                 # 获取属性
@@ -147,7 +144,7 @@ class Parse:
                                        self.alarmPropertiesRegex['repeatInterval'][1],self.alarmPropertiesRegex['flag'][1],
                                        self.alarmPropertiesRegex['mPackageName'][1],int(self.alarmPropertiesRegex['mMaxWhenElapsed'][1]),
                                        self.alarmPropertiesRegex['requester'][1],self.alarmPropertiesRegex['app_standby'][1])
-                        self.mAlarmStore.add(mAlarm)
+                        self.mAlarmStore.append(mAlarm)
                         self.initAlarmProperties()
                 # 获取属性
                 self.getAlarmProperties(line)

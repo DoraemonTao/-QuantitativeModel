@@ -1,11 +1,11 @@
-from AlarmManager import *
+from alarm.AlarmManager import *
 # 对齐模块中alarm的数据结构
 class BatchingAlarmStore:
     mAlarmBatches = []
-    mSize = None
 
     def __init__(self):
         self.mSize = 0
+        self.deliveryBatchNum = 0
 
     def add(self, alarm):
         self.insertAndBatchAlarm(alarm)
@@ -43,18 +43,18 @@ class BatchingAlarmStore:
 
     def getNextWakeFromIdleAlarm(self):
         for batch in self.mAlarmBatches:
-            if(batch.mFlags & FLAG_WAKE_FROM_IDLE == 0):
+            if batch.mFlags & FLAG_WAKE_FROM_IDLE == 0:
                 continue
             for i in range(len(batch)):
                 a = batch.get(i)
-                if (a.flags & FLAG_WAKE_FROM_IDLE !=0 ):
+                if a.flags & FLAG_WAKE_FROM_IDLE !=0:
                     return a
         return None
 
     # 将alarm插入至合适的batch中
     def insertAndBatchAlarm(self, alarm):
         whichBatch = self.attemptCoalesce(alarm.getWhenElapsed(),alarm.getMaxWhenElapsed())
-        if (whichBatch < 0):
+        if whichBatch < 0:
             self.addBatch(self.mAlarmBatches, Batch(alarm))
 
     # 在alarmStore队列中加入新的Batch
@@ -78,10 +78,22 @@ class BatchingAlarmStore:
         n = len(self.mAlarmBatches)
         for i in range(n):
             b = self.mAlarmBatches[i]
-            if (b.canHold(whenElapsed, maxWhen)):
+            if b.canHold(whenElapsed, maxWhen):
                 return i
 
         return -1
+
+    # 去除当前时间触发的alarm
+    def removePendingAlarms(self,nowElapsed):
+        deliveryNum = 0
+        while len(self.mAlarmBatches)>0:
+            batch = self.mAlarmBatches[0]
+            if batch.mStart > nowElapsed:
+                break
+            self.mAlarmBatches.pop(0)
+            deliveryNum += 1
+        return deliveryNum
+
 
 
     def updateAlarmDeliveries(self,fun):
@@ -102,8 +114,6 @@ class BatchingAlarmStore:
                 self.insertAndBatchAlarm(batch[i])
 
 class Batch:
-    mStart = None
-    mEnd = None
     mAlarms = []
 
     # 新加入一个alarm时调用
@@ -147,6 +157,6 @@ class Batch:
 
 # 测试用
 if __name__ == '__main__':
-    alarmstores = AlarmStore()
+    alarmstores = BatchingAlarmStore()
     alarm = Alarm()
     alarmstores.add(alarm)

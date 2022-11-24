@@ -1,14 +1,10 @@
 class JobInfo():
-    def __init__(self,service,isPeriodic,isPersisted,intervalMills,flexMills):
-        self.service = service
+    def __init__(self,isPeriodic,isPersisted,intervalMills,flexMills):
         self.isPeriodic = isPeriodic
         self.isPersisted = isPersisted
         self.intervalMills = intervalMills
         self.flexMills = flexMills
 
-
-    def getService(self):
-        return self.service
 
     def isPeriodic(self):
         return self.service

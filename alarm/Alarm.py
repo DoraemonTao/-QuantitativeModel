@@ -22,9 +22,11 @@ class Alarm:
     windowMills = None
     mMaxWhenElapsed = None
     # 在策略下需要保证的执行时间
-    mPolicyWhenElapsed = []
-    def __init__(self,type,when,requestedWhenElapsed,windowLength,interval
-        ,flags,pkgName,maxWhenElapsed,requester,app_standby):
+    mPolicyWhenElapsed = [0,0,0,0,0]
+    def __init__(self,type,when,requestedWhenElapsed,maxWhenElapsed,enqueueTime,elapsedRealtime,windowLength,interval
+        ,flags,pkgName,requester,app_standby):
+        self.elapsedRealtime = elapsedRealtime;
+        self.enqueueTime = enqueueTime
         self.type = type
         self.origWhen = when
         self.mWhenElapsed = requestedWhenElapsed

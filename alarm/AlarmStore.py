@@ -63,6 +63,9 @@ class AlarmStore:
 
         return -1
 
+    def removePendingAlarms(self,nowElapsed):
+        pass
+
     class Batch:
         mStart = None
         mEnd = None

@@ -25,10 +25,6 @@ class AlarmManagerService:
         """
         return self.mDeliveryNum
 
-    # 设置当前时间
-    def setCurrentTime(self, time):
-        self.currentTime = time
-
     # 将当前时间移至当前，删除store中执行的batch
     def setTime(self, alarm):
         SystemTime.setCurrentTime(alarm.enqueueTime)

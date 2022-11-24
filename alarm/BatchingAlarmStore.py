@@ -1,9 +1,10 @@
 from alarm.AlarmManager import *
 # 对齐模块中alarm的数据结构
 class BatchingAlarmStore:
-    mAlarmBatches = []
+
 
     def __init__(self):
+        self.mAlarmBatches = []
         self.mSize = 0
         self.deliveryBatchNum = 0
 
@@ -56,11 +57,19 @@ class BatchingAlarmStore:
         whichBatch = self.attemptCoalesce(alarm.getWhenElapsed(),alarm.getMaxWhenElapsed())
         if whichBatch < 0:
             self.addBatch(self.mAlarmBatches, Batch(alarm))
+        else:
+            batch = self.mAlarmBatches[whichBatch]
+            if batch.add(alarm):
+                self.mAlarmBatches.remove(whichBatch)
+                self.addBatch(self.mAlarmBatches,batch)
 
     # 在alarmStore队列中加入新的Batch
     def addBatch(self, list, newBatch):
-        index = self.binarySearch(list, newBatch,0,len(list)-1)
-        list.insert(index, newBatch)
+        if len(list) == 0:
+            list.append(newBatch)
+        else:
+            index = self.binarySearch(list, newBatch,0,len(list)-1)
+            list.insert(index, newBatch)
 
     # 二分查找
     def binarySearch(self, list, newBatch, l, r):
@@ -129,7 +138,7 @@ class Batch:
         return self.mAlarms[index]
 
     def canHold(self, whenElapsed, maxWhen):
-        return (self.mEnd >= whenElapsed) & (self.mStart <= maxWhen)
+        return (self.mEnd >= whenElapsed) and (self.mStart <= maxWhen)
 
     def add(self, alarm):
         # 是否改变batch

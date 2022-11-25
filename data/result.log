@@ -1611,7 +1611,8 @@ Current Alarm Manager state:
       2,4759747,1669286772298,1669286772798,1669286772298,1669286767298,500,0,8,com.android.bluetooth,,1669286772298,1669286767299,/,/,1669286767299
       2,4765289,1669286777840,1669286778340,1669286777840,1669286772840,500,0,8,com.android.bluetooth,,1669286777840,1669286772841,/,/,1669286772841
       2,4770837,1669286783388,1669286783888,1669286783388,1669286778387,500,0,8,com.android.bluetooth,,1669286783388,1669286778388,/,/,1669286778388
-  Alarm manager stats:
+
+ Alarm manager stats:
     REORDER_ALARMS_FOR_STANDBY: count=951, total=60.8ms, avg=0.064ms, max calls/s=122 max dur/s=1.4ms max time=1.4ms
     HAS_SCHEDULE_EXACT_ALARM: count=37, total=2.1ms, avg=0.057ms, max calls/s=8 max dur/s=0.5ms max time=0.4ms
     REORDER_ALARMS_FOR_TARE: count=0, total=0.0ms, avg=0.000ms, max calls/s=0 max dur/s=0.0ms max time=0.0ms

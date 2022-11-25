@@ -1,4 +1,5 @@
 from alarm.AlarmManager import *
+
 # 对齐模块中alarm的数据结构
 class BatchingAlarmStore:
 
@@ -54,13 +55,13 @@ class BatchingAlarmStore:
 
     # 将alarm插入至合适的batch中
     def insertAndBatchAlarm(self, alarm):
-        whichBatch = self.attemptCoalesce(alarm.getWhenElapsed(),alarm.getMaxWhenElapsed())
+        whichBatch = self.attemptCoalesce(alarm.getWhenElapsed(),alarm.getMaxWhenElapsed()) if (alarm.flags & FLAG_STANDALONE != 0) else -1
         if whichBatch < 0:
             self.addBatch(self.mAlarmBatches, Batch(alarm))
         else:
             batch = self.mAlarmBatches[whichBatch]
             if batch.add(alarm):
-                self.mAlarmBatches.remove(whichBatch)
+                self.mAlarmBatches.pop(whichBatch)
                 self.addBatch(self.mAlarmBatches,batch)
 
     # 在alarmStore队列中加入新的Batch
@@ -145,6 +146,7 @@ class Batch:
         newStart = False
         index = self.binarySearch(self.mAlarms,alarm,0,len(self.mAlarms)-1)
         self.mAlarms.insert(index,alarm)
+        # if alarm.getWhenElapsed() > self.mStart:
         if alarm.getWhenElapsed() > self.mStart:
             self.mStart = alarm.getWhenElapsed()
             newStart = True
@@ -154,8 +156,8 @@ class Batch:
 
     def binarySearch(self, mAlarms, alarm, l, r):
         if r >= l:
-            mid = int(1 + (r - 1) / 2)
-            if mAlarms[mid].mStart > alarm.mStart:
+            mid = int(l + (r - l) / 2)
+            if mAlarms[mid].getWhenElapsed() > alarm.getWhenElapsed():
                 return self.binarySearch(mAlarms, alarm, l, mid - 1, )
             else:
                 return self.binarySearch(mAlarms, alarm, mid + 1, r)

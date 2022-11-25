@@ -34,7 +34,7 @@ class ParseText:
             # alarm paragraph
             if alarmContentFlag:
                 policyWhenElapsed = []
-                attribute = line.strip().split(',')
+                attribute = line.split(',')
                 type = int(attribute[0])
                 when = int(attribute[1])
                 requestedWhenElapsed = int(attribute[2])
@@ -42,14 +42,11 @@ class ParseText:
                 elapsedRealtime = int(attribute[4])
                 enqueueTime = int(attribute[5])
                 windowLength = int(attribute[6])
-                # repeatInterval = int(attribute[7])
-                # flags = int(attribute[8])
-                # TODO: bug
-                repeatInterval = int(attribute[7][:-1])
-                flags = int(attribute[7][-1])
+                repeatInterval = int(attribute[7])
+                flags = int(attribute[8])
                 pkg = attribute[9]
                 policyWhenElapsed.append(None if attribute[11] == '/' else int(attribute[11]))
-                policyWhenElapsed.append(None if attribute[12] == '/' else int(attribute[10]))
+                policyWhenElapsed.append(None if attribute[12] == '/' else int(attribute[12]))
                 policyWhenElapsed.append(None if attribute[13] == '/' else int(attribute[13]))
                 mAlarm = Alarm(type, when, requestedWhenElapsed, maxWhenElapsed, enqueueTime, elapsedRealtime,
                                windowLength, repeatInterval, flags, pkg,

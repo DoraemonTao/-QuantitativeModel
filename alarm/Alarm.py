@@ -13,14 +13,6 @@ class Alarm:
 
     mPolicyWhenElapsed  = []
 
-    mWhenElapsed = None
-    triggerAtMillis = None
-    repeatinterval = None
-    # 只有wakeup类型才会唤醒设备，我们只考虑wakeup类型的alarm
-    wakeup = None
-    mPackageName = None
-    windowMills = None
-    mMaxWhenElapsed = None
     # 在策略下需要保证的执行时间
     mPolicyWhenElapsed = [0,0,0,0,0]
     def __init__(self,type,when,requestedWhenElapsed,maxWhenElapsed,enqueueTime,elapsedRealtime,windowLength,interval

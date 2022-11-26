@@ -12,7 +12,8 @@ class JobStatus:
                  isPeriodic,
                  isPersisted,
                  intervalMills,
-                 flexMills
+                 flexMills,
+                 flags
                  ):
 
         self.calling = callingUid
@@ -33,3 +34,4 @@ class JobStatus:
         self.isPersisted = isPersisted
         self.intervalMills = intervalMills
         self.flexMills = flexMills
+        self.flags = flags

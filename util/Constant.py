@@ -31,13 +31,16 @@ MIN_FUTURITY = 5*1000
 MAX_INTERVAL = 365*INTERVAL_DAY
 
 
-# 优化策略
+# --------优化策略--------
 # 交付时间从mStart变更为mEnd
 DELIVERY_TIME_CHANGE = True
 
 # 周期alarm延迟
-WINDOW_LENGTH_ENLARGE = True
+WINDOW_LENGTH_ENLARGE = False
 DELAY_PERCENTAGE = 0.96
+
+# alarm与job的对齐
+TASK_ALGIN = True
 
 
 

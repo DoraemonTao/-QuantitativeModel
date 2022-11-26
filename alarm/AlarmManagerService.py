@@ -13,15 +13,10 @@ class AlarmManagerService:
             self.mAlarmStore = OptiBatchedAlarmStore()
         else:
             self.mAlarmStore = BatchingAlarmStore()
-        self.currentTime = None
         self.mPendingIdleUntil = None
         self.mNextWakeFromIdle = None
         self.mDeliveryNum = 0
         self.mWakeupNum = 0
-
-    # 获得当前时间
-    def getCurrentTime(self):
-        return self.currentTime
 
     def getDeliveryNum(self) -> int:
         """
@@ -65,7 +60,7 @@ class AlarmManagerService:
 
     # 更新idlePolicy下的Elapsed
     def adjustDeliveryTimeBasedOnDeviceIdle(self, alarm):
-        nowElapsed = self.getCurrentTime()
+        nowElapsed = SystemTime.getCurrentTime()
 
         if alarm.flags & (FLAG_ALLOW_WHILE_IDLE | FLAG_WAKE_FROM_IDLE) != 0:
             deviceIdlePolicyTime = nowElapsed

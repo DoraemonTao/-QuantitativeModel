@@ -1,2 +1,10 @@
+from util import SystemTime
 class JobSchedulerService:
- pass
+    def __init__(self):
+        self.deliveryNum = 0
+
+    def getDeliveryNum(self):
+        return self.deliveryNum
+
+    def setTime(self,job):
+        SystemTime.setCurrentTime(job.)

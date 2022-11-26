@@ -1,9 +1,11 @@
 class JobInfo():
-    def __init__(self,isPeriodic,isPersisted,intervalMills,flexMills):
+    def __init__(self,isPeriodic,isPersisted,intervalMills,flexMills,flags):
+
         self.isPeriodic = isPeriodic
         self.isPersisted = isPersisted
         self.intervalMills = intervalMills
         self.flexMills = flexMills
+        self.flags = flags
 
 
     def isPeriodic(self):

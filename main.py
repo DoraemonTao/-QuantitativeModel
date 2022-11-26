@@ -99,7 +99,7 @@ if __name__ == '__main__':
     # 将alarm和job按照enqueueTime排序
     mAlarm.sort(key=lambda alarm: alarm.enqueueTime)
     mJob.sort(key=lambda job: job.earliestRunTimeElapsedMillis)
-    # TODO:将delivery time延长至repeatInterval
+    # 将delivery time延长至repeatInterval
     if WINDOW_LENGTH_ENLARGE:
         delivery_time_delay(mAlarm)
     dump_alarm_situation(mAlarm)

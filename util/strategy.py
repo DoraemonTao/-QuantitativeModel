@@ -7,9 +7,9 @@ def delivery_time_delay(alarms):
         if alarm.repeatInterval != 0 and alarm.repeatInterval > alarm.windowLength:
             if alarm.mMaxWhenElapsed < alarm.mWhenElapsed + alarm.repeatInterval * DELAY_PERCENTAGE:
                 alarm.mMaxWhenElapsed = alarm.mWhenElapsed + alarm.repeatInterval * DELAY_PERCENTAGE
-        if alarm.windowLength != 0 and alarm.flags != FLAG_IDLE_UNTIL:
-            if alarm.mPolicyWhenElapsed[0] < alarm.enqueueTime + alarm.windowLength * 1.28:
-                alarm.setPolicyElapsed(0,alarm.enqueueTime + alarm.windowLength * 1.28)
+        if alarm.windowLength != 0 :
+            if alarm.mMaxWhenElapsed < alarm.getWhenElapsed() + alarm.windowLength * 1.7:
+                alarm.mMaxWhenElapsed = alarm.getWhenElapsed() + alarm.windowLength * 1.7
 
 
 

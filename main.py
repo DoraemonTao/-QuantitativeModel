@@ -1,8 +1,8 @@
 from util.Parse import Parse
 from alarm.AlarmManagerService import *
 from job.JobSchedulerService import *
+from util.strategy import *
 from util.ParseText import *
-
 
 def parse_txt(BatteryState):
     f = open(BatteryState, encoding="utf-8")
@@ -51,6 +51,33 @@ def delivery_tasks(tasks, alarmManagerService):
         if isinstance(task, Alarm):
             alarmManagerService.set(task)
 
+# 打印输出alarm的基本信息
+def dump_alarm_situation(alarms):
+    alarms_num = len(alarms)
+    flex_num = 0
+    repeat_num = 0
+    wakeup_num = 0
+    flex_wakeup_num = 0
+    for alarm in alarms:
+        # is Wakeup?
+        if alarm.wakeup:
+            wakeup_num += 1
+        if alarm.windowLength != 0:
+            flex_num += 1
+            if alarm.wakeup:
+                flex_wakeup_num += 1
+        if alarm.repeatInterval != 0:
+            repeat_num += 1
+    print("可延长alarm占比："+str(flex_num/alarms_num)+"\n")
+    print("周期性alarm占比：" + str(repeat_num/alarms_num) + "\n")
+    print("wakeup型alarm占比：" + str(wakeup_num / alarms_num) + "\n")
+    print("wakeup&可延长型alarm占比：" + str(flex_wakeup_num/ alarms_num) + "\n")
+
+# 打印输出指标的信息
+def dump_task_delivery_situation(alarm_service):
+    print("Total tasks num: " + str(len(mTask)) + "\n")
+    print("Total delivery num: " + str(alarm_service.getDeliveryNum()) + "\n")
+    print("Wakeup num: "+ str(alarm_service.getWakeupNum()))
 
 def get_task(path):
     fileContent = parse_txt(path)
@@ -59,24 +86,6 @@ def get_task(path):
     mAlarm = mParseText.get_alarm_store()
     mJob = mParseText.get_job_store()
     return mAlarm, mJob
-
-# 延长alarm的周期
-def delivery_time_delay(alarms):
-    repeat_num = 0
-    flex_num = 0
-    for alarm in alarms:
-        if alarm.repeatInterval != 0 and alarm.repeatInterval > alarm.windowLength:
-            if alarm.mMaxWhenElapsed < alarm.mWhenElapsed + alarm.repeatInterval * DELAY_PERCENTAGE:
-                alarm.mMaxWhenElapsed = alarm.mWhenElapsed + alarm.repeatInterval * DELAY_PERCENTAGE
-                print("延长比例: "+str((alarm.repeatInterval * DELAY_PERCENTAGE)/alarm.windowLength)+"\n")
-        if alarm.windowLength != 0:
-            flex_num += 1
-        if alarm.repeatInterval != 0:
-            repeat_num += 1
-    print("可延长alarm占比："+str(flex_num/len(alarms))+"\n")
-    print("周期性alarm占比：" + str(repeat_num/len(alarms)) + "\n")
-
-
 
 if __name__ == '__main__':
     mAlarm = []
@@ -91,10 +100,11 @@ if __name__ == '__main__':
     mAlarm.sort(key=lambda alarm: alarm.enqueueTime)
     mJob.sort(key=lambda job: job.earliestRunTimeElapsedMillis)
     # TODO:将delivery time延长至repeatInterval
-    if DELIVERY_TIME_DELAY:
+    if WINDOW_LENGTH_ENLARGE:
         delivery_time_delay(mAlarm)
+    dump_alarm_situation(mAlarm)
     mTask = sort_alarm_job(mAlarm, mJob)
     delivery_tasks(mTask,alarmService)
-    print("Total tasks num: " + str(len(mTask)) + "\n")
-    print("Total delivery num: "+str(alarmService.getDeliveryNum())+"\n")
+    dump_task_delivery_situation(alarmService)
+
 

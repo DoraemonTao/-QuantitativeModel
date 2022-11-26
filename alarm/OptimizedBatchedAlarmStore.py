@@ -8,15 +8,23 @@ class OptiBatchedAlarmStore(BatchingAlarmStore):
         if len(self.mAlarmBatches):
             return self.mAlarmBatches[0].mEnd
 
-    def removePendingAlarms(self,nowElapsed):
+    def getNextWakeupDeliveryTime(self):
+        for b in self.mAlarmBatches:
+            if b.hasWakeups():
+                return b.mEnd
+
+    def removePendingAlarms(self, nowElapsed):
         deliveryNum = 0
-        while len(self.mAlarmBatches)>0:
+        wakeupNum = 0
+        while len(self.mAlarmBatches) > 0:
             batch = self.mAlarmBatches[0]
             if batch.mEnd > nowElapsed:
                 break
+            if batch.hasWakeups():
+                wakeupNum += 1
             self.mAlarmBatches.pop(0)
             deliveryNum += 1
-        return deliveryNum
+        return deliveryNum, wakeupNum
 
 
 

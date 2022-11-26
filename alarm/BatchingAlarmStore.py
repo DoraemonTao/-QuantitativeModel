@@ -43,6 +43,12 @@ class BatchingAlarmStore:
         if len(self.mAlarmBatches):
             return self.mAlarmBatches[0].mStart
 
+    # 得到下次唤醒的时间
+    def getNextWakeupDeliveryTime(self):
+        for b in self.mAlarmBatches:
+            if b.hasWakeups():
+                return b.mStart
+
     def getNextWakeFromIdleAlarm(self):
         for batch in self.mAlarmBatches:
             if batch.mFlags & FLAG_WAKE_FROM_IDLE == 0:
@@ -96,13 +102,16 @@ class BatchingAlarmStore:
     # 去除当前时间触发的alarm
     def removePendingAlarms(self,nowElapsed):
         deliveryNum = 0
+        wakeupNum = 0
         while len(self.mAlarmBatches)>0:
             batch = self.mAlarmBatches[0]
             if batch.mStart > nowElapsed:
                 break
+            if batch.hasWakeups():
+                wakeupNum += 1
             self.mAlarmBatches.pop(0)
             deliveryNum += 1
-        return deliveryNum
+        return deliveryNum , wakeupNum
 
 
 
@@ -124,22 +133,26 @@ class BatchingAlarmStore:
                 self.insertAndBatchAlarm(batch[i])
 
 class Batch:
-    mAlarms = []
-
     # 新加入一个alarm时调用
     def __init__(self, seed):
+        self.mAlarms = []
         self.mStart = seed.getWhenElapsed()
         self.mEnd = seed.getMaxWhenElapsed()
+        self.mFlags = seed.flags
         self.mAlarms.append(seed)
-
-    def size(self):
-        return len(self.mAlarms)
 
     def get(self, index):
         return self.mAlarms[index]
 
     def canHold(self, whenElapsed, maxWhen):
         return (self.mEnd >= whenElapsed) and (self.mStart <= maxWhen)
+
+    def hasWakeups(self):
+        for i in range(len(self.mAlarms)):
+            a = self.mAlarms[i]
+            if a.wakeup:
+                return True
+        return False
 
     def add(self, alarm):
         # 是否改变batch

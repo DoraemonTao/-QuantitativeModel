@@ -3,16 +3,21 @@ from util import SystemTime
 from util.Constant import *
 from alarm.AlarmManager import *
 from alarm.BatchingAlarmStore import BatchingAlarmStore
+from alarm.OptimizedBatchedAlarmStore import OptiBatchedAlarmStore
 import random
 
 
 class AlarmManagerService:
     def __init__(self):
-        self.mAlarmStore = BatchingAlarmStore()
+        if DELIVERY_TIME_CHANGE:
+            self.mAlarmStore = OptiBatchedAlarmStore()
+        else:
+            self.mAlarmStore = BatchingAlarmStore()
         self.currentTime = None
         self.mPendingIdleUntil = None
         self.mNextWakeFromIdle = None
         self.mDeliveryNum = 0
+        self.mWakeupNum = 0
 
     # 获得当前时间
     def getCurrentTime(self):
@@ -25,11 +30,16 @@ class AlarmManagerService:
         """
         return self.mDeliveryNum
 
+    def getWakeupNum(self):
+        return self.mWakeupNum
+
     # 将当前时间移至当前，删除store中执行的batch
     def setTime(self, alarm):
         SystemTime.setCurrentTime(alarm.enqueueTime)
         # 删除当前时间前的batch
-        self.mDeliveryNum += self.mAlarmStore.removePendingAlarms(SystemTime.getCurrentTime())
+        deliveryNum, wakeupNum = self.mAlarmStore.removePendingAlarms(SystemTime.getCurrentTime())
+        self.mDeliveryNum += deliveryNum
+        self.mWakeupNum += wakeupNum
 
     # 调度alarm
     def set(self, a):

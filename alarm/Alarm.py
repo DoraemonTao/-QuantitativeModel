@@ -1,3 +1,6 @@
+import util.Constant
+
+
 class Alarm:
     # 应用的策略，我们模块暂只引入idle状态
     NUM_POLICIES = 2
@@ -30,6 +33,7 @@ class Alarm:
         self.mMaxWhenElapsed = maxWhenElapsed
         self.mPolicyWhenElapsed[self.REQUESTER_POLICY_INDEX] = requester
         self.mPolicyWhenElapsed[self.APP_STANDBY_POLICY_INDEX] = app_standby
+        self.wakeup = type == util.Constant.RTC_WAKEUP or type == util.Constant.ELAPSED_REALTIME_WAKEUP
 
 
 

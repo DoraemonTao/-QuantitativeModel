@@ -1,6 +1,7 @@
 import re
 from alarm.Alarm import *
 from job.JobStatus import *
+from util.Constant import *
 
 
 class ParseText:

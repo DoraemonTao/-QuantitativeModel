@@ -66,13 +66,14 @@ class ParseText:
                 latestRunTimeElapsedMills = int(attribute[6])
                 lastSuccessfulRunTime = int(attribute[7])
                 lastFailedRunTime = int(attribute[8])
-                isPeriodic = bool(attribute[9])
-                isPersisted = bool(attribute[10])
-                intervalMills = int(attribute[11])
-                flexMills = int(attribute[12])
+                completedJobTimeElapsd = int(attribute[9])
+                isPeriodic = bool(attribute[10])
+                isPersisted = bool(attribute[11])
+                intervalMills = int(attribute[12])
+                flexMills = int(attribute[13])
                 mJob = JobStatus(callingUid, sourcePackageName, sourceUserId, standbyBucket,
                                  tag, earliestRunTimeElapsedMillis, latestRunTimeElapsedMills,
-                                 lastSuccessfulRunTime, lastFailedRunTime, isPersisted,
+                                 lastSuccessfulRunTime, lastFailedRunTime, completedJobTimeElapsd, isPeriodic,
                                  isPersisted, intervalMills, flexMills)
                 self.mJobStore.append(mJob)
 

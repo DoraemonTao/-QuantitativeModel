@@ -4,6 +4,7 @@ from util.Constant import *
 from alarm.AlarmManager import *
 from alarm.BatchingAlarmStore import BatchingAlarmStore
 from alarm.OptimizedBatchedAlarmStore import OptiBatchedAlarmStore
+from job.JobSchedulerService import JobSchedulerService
 import random
 
 
@@ -31,7 +32,11 @@ class AlarmManagerService:
     # 将当前时间移至当前，删除store中执行的batch
     def setTime(self, alarm):
         SystemTime.setCurrentTime(alarm.enqueueTime)
-        # 删除当前时间前的batch
+        JobSchedulerService.deliveryJob()
+        self.deliveryAlarm()
+
+    # 调度当前时间前的batch
+    def deliveryAlarm(self):
         deliveryNum, wakeupNum = self.mAlarmStore.removePendingAlarms(SystemTime.getCurrentTime())
         self.mDeliveryNum += deliveryNum
         self.mWakeupNum += wakeupNum

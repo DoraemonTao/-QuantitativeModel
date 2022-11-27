@@ -9,6 +9,7 @@ class JobStatus:
                  latestRunTimeElapsedMillis,
                  lastSuccessfulRunTime,
                  lastFailedRunTime,
+                 completedJobTimeElapsd,
                  isPeriodic,
                  isPersisted,
                  intervalMills,
@@ -29,6 +30,7 @@ class JobStatus:
 
         self.mLastSuccessfulRunTime = lastSuccessfulRunTime
         self.mLastFailedRunTime = lastFailedRunTime
+        self.completedJobTimeElapsd = completedJobTimeElapsd
 
         self.isPeriodic = isPeriodic
         self.isPersisted = isPersisted

@@ -73,6 +73,9 @@ def dump_alarm_situation(alarms):
     print("wakeup型alarm占比：" + str(wakeup_num / alarms_num) + "\n")
     print("wakeup&可延长型alarm占比：" + str(flex_wakeup_num/ alarms_num) + "\n")
 
+def dump_job_situation(jobs):
+
+
 # 打印输出指标的信息
 def dump_task_delivery_situation(alarm_service):
     print("Total tasks num: " + str(len(mTask)) + "\n")

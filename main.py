@@ -27,7 +27,7 @@ def sort_alarm_job(alarms, jobs):
     else:
         nextJob = jobs.pop(0)
     while len(alarms) != 0 or len(jobs) != 0:
-        if nextAlarm.enqueueTime < nextJob.earliestRunTimeElapsedMillis:
+        if nextAlarm.enqueueTime < nextJob.completedJobTimeElapsd:
             tasks.append(nextAlarm)
             if len(alarms) == 0:
                 for job in jobs:
@@ -74,13 +74,17 @@ def dump_alarm_situation(alarms):
     print("wakeup&可延长型alarm占比：" + str(flex_wakeup_num/ alarms_num) + "\n")
 
 def dump_job_situation(jobs):
-
+    pass
 
 # 打印输出指标的信息
-def dump_task_delivery_situation(alarm_service):
-    print("Total tasks num: " + str(len(mTask)) + "\n")
+def dump_task_delivery_situation(alarm_service,job_service):
+    print("-------------Alarm-------------")
+    print("Total tasks num: " + str(alarm_service.mAlarmStore.mNum) + "\n")
     print("Total delivery num: " + str(alarm_service.getDeliveryNum()) + "\n")
     print("Wakeup num: "+ str(alarm_service.getWakeupNum()))
+    print("-------------Job-------------")
+    print("Total delivery num: " + str(job_service.mDeliveryNum) + "\n")
+    print("------------Tasks------------")
 
 def get_task(path):
     fileContent = parse_txt(path)
@@ -101,13 +105,13 @@ if __name__ == '__main__':
 
     # 将alarm和job按照enqueueTime排序
     mAlarm.sort(key=lambda alarm: alarm.enqueueTime)
-    mJob.sort(key=lambda job: job.earliestRunTimeElapsedMillis)
+    mJob.sort(key=lambda job: job.completedJobTimeElapsd)
     # 将delivery time延长至repeatInterval
     if WINDOW_LENGTH_ENLARGE:
         delivery_time_delay(mAlarm)
     dump_alarm_situation(mAlarm)
     mTask = sort_alarm_job(mAlarm, mJob)
     delivery_tasks(mTask,alarmService)
-    dump_task_delivery_situation(alarmService)
+    dump_task_delivery_situation(alarmService,jobService)
 
 

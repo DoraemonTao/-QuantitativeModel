@@ -6,12 +6,12 @@ class BatchingAlarmStore:
 
     def __init__(self):
         self.mAlarmBatches = []
-        self.mSize = 0
+        self.mNum = 0
         self.deliveryBatchNum = 0
 
     def add(self, alarm):
         self.insertAndBatchAlarm(alarm)
-        self.mSize = self.mSize + 1
+        self.mNum = self.mNum + 1
 
     def addAll(self, alarms):
         if (alarms == None):
@@ -24,7 +24,7 @@ class BatchingAlarmStore:
         return
 
     def removeBatch(self,index):
-        self.mSize -= len(self.mAlarmBatches[index])
+        self.mNum -= len(self.mAlarmBatches[index])
         self.mAlarmBatches.pop(index)
 
 
@@ -36,7 +36,7 @@ class BatchingAlarmStore:
                 self.insertAndBatchAlarm(batch[i])
 
     def getSize(self):
-        return self.mSize
+        return self.mNum
 
     # 得到下次的交付时间
     def getNextDeliveryTime(self):

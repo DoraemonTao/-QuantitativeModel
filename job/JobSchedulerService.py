@@ -13,8 +13,6 @@ class JobSchedulerService:
     # 设置系统时间，并交付任务
     def setTime(self,job):
         SystemTime.setCurrentTime(job.completedJobTimeElapsd)
-        AlarmManagerService.deliveryAlarm()
-        self.deliveryJob()
 
     # job加入时的调度函数
     def schedule(self,j):

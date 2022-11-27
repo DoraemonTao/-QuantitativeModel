@@ -32,8 +32,6 @@ class AlarmManagerService:
     # 将当前时间移至当前，删除store中执行的batch
     def setTime(self, alarm):
         SystemTime.setCurrentTime(alarm.enqueueTime)
-        JobSchedulerService.deliveryJob()
-        self.deliveryAlarm()
 
     # 调度当前时间前的batch
     def deliveryAlarm(self):

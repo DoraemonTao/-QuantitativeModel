@@ -52,12 +52,13 @@ def delivery_tasks(tasks, alarmManagerService,jobSchedulerService):
             # 系统时间移至当前task进入时间
             SystemTime.setCurrentTime(task.enqueueTime)
             alarmManagerService.set(task)
-            jobSchedulerService.deliveryJob()
+            # jobSchedulerService.deliveryJob()
         else:
+            pass
             # 系统时间移至当前task进入时间
-            SystemTime.setCurrentTime(task.completedJobTimeElapsd)
-            alarmManagerService.deliveryAlarm(task)
-            jobSchedulerService.schedule(task)
+            # SystemTime.setCurrentTime(task.completedJobTimeElapsd)
+            # alarmManagerService.deliveryAlarm()
+            # jobSchedulerService.schedule(task)
 
 # 打印输出alarm的基本信息
 def dump_alarm_situation(alarms):

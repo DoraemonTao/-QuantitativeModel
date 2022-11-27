@@ -11,7 +11,6 @@ class JobSchedulerService:
 
     # job加入时的调度函数
     def schedule(self,j):
-        self.setTime(j)
         self.startTackingJobLocked(j)
 
     # 交付满足约束条件的alarm

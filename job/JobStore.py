@@ -49,8 +49,7 @@ class JobSet():
 
     def getAllJobs(self):
         allJobs = []
-        for i in range(len(self.mJobs)):
-            jobs = self.mJobs[i]
+        for uid,jobs in self.mJobs.items():
             if jobs != None:
                 for j in range(len(jobs)):
                     allJobs.append(jobs[j])

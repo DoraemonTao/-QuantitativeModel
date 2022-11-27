@@ -13,11 +13,10 @@ class JobStatus:
                  isPeriodic,
                  isPersisted,
                  intervalMills,
-                 flexMills,
-                 flags
+                 flexMills
                  ):
 
-        self.calling = callingUid
+        self.callingUid = callingUid
         self.standbyBucket = standbyBucket
 
         self.sourceUserId = sourceUserId
@@ -36,4 +35,4 @@ class JobStatus:
         self.isPersisted = isPersisted
         self.intervalMills = intervalMills
         self.flexMills = flexMills
-        self.flags = flags
+        # self.flags = flags

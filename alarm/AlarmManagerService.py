@@ -37,6 +37,7 @@ class AlarmManagerService:
 
     # 调度alarm
     def set(self, a):
+        self.deliveryAlarm()
         if (a.flags & FLAG_IDLE_UNTIL) != 0:
             self.adjustIdleUntilTime(a)
             self.mPendingIdleUntil = a

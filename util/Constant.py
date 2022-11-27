@@ -33,7 +33,7 @@ MAX_INTERVAL = 365*INTERVAL_DAY
 
 # --------优化策略--------
 # 交付时间从mStart变更为mEnd
-DELIVERY_TIME_CHANGE = True
+DELIVERY_TIME_CHANGE = False
 
 # 周期alarm延迟
 WINDOW_LENGTH_ENLARGE = False

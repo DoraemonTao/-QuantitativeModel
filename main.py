@@ -1,3 +1,5 @@
+import sys
+
 from util.Parse import Parse
 from alarm.AlarmManagerService import *
 from job.JobSchedulerService import *
@@ -59,6 +61,9 @@ def delivery_tasks(tasks, alarmManagerService,jobSchedulerService):
             # SystemTime.setCurrentTime(task.completedJobTimeElapsd)
             # alarmManagerService.deliveryAlarm()
             # jobSchedulerService.schedule(task)
+    SystemTime.setCurrentTime(sys.maxsize)
+    alarmManagerService.deliveryAlarm()
+    jobSchedulerService.deliveryJob()
 
 # 打印输出alarm的基本信息
 def dump_alarm_situation(alarms):

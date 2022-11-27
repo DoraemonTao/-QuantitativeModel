@@ -4,7 +4,6 @@ from util.Constant import *
 from alarm.AlarmManager import *
 from alarm.BatchingAlarmStore import BatchingAlarmStore
 from alarm.OptimizedBatchedAlarmStore import OptiBatchedAlarmStore
-from job.JobSchedulerService import JobSchedulerService
 import random
 
 
@@ -29,8 +28,9 @@ class AlarmManagerService:
     def getWakeupNum(self):
         return self.mWakeupNum
 
-    # 调度当前时间前的batch
+    # 将当前时间移至当前，删除store中执行的batch
     def deliveryAlarm(self):
+        # 删除当前时间前的batch
         deliveryNum, wakeupNum = self.mAlarmStore.removePendingAlarms(SystemTime.getCurrentTime())
         self.mDeliveryNum += deliveryNum
         self.mWakeupNum += wakeupNum
@@ -58,7 +58,7 @@ class AlarmManagerService:
 
     # 更新idlePolicy下的Elapsed
     def adjustDeliveryTimeBasedOnDeviceIdle(self, alarm):
-        nowElapsed = SystemTime.getCurrentTime()
+        nowElapsed = self.getCurrentTime()
 
         if alarm.flags & (FLAG_ALLOW_WHILE_IDLE | FLAG_WAKE_FROM_IDLE) != 0:
             deviceIdlePolicyTime = nowElapsed

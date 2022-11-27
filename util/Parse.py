@@ -1,7 +1,6 @@
 import re
 
 from alarm import Alarm
-from job import JobInfo
 from job import JobStatus
 
 

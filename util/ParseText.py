@@ -23,12 +23,12 @@ class ParseText:
             line = line.lstrip()
             if not alarmContentFlag and not jobContentFlag:
                 alarmContentFlag = re.search("Delivery alarm :.*",line)
-                continue
+                if alarmContentFlag:
+                    continue
             # judge arrive job paragraph
             if not jobContentFlag:
                 jobContentFlag = re.search("Recently delivery jobs:.*", line)
-                if (jobContentFlag):
-                    alarmContentFlag = False
+                if jobContentFlag:
                     continue
 
             # parse alarm info

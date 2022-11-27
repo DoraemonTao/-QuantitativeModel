@@ -29,10 +29,6 @@ class AlarmManagerService:
     def getWakeupNum(self):
         return self.mWakeupNum
 
-    # 将当前时间移至当前，删除store中执行的batch
-    def setTime(self, alarm):
-        SystemTime.setCurrentTime(alarm.enqueueTime)
-
     # 调度当前时间前的batch
     def deliveryAlarm(self):
         deliveryNum, wakeupNum = self.mAlarmStore.removePendingAlarms(SystemTime.getCurrentTime())
@@ -41,8 +37,6 @@ class AlarmManagerService:
 
     # 调度alarm
     def set(self, a):
-        # 时间移至当前alarm进入时间
-        self.setTime(a)
         if (a.flags & FLAG_IDLE_UNTIL) != 0:
             self.adjustIdleUntilTime(a)
             self.mPendingIdleUntil = a

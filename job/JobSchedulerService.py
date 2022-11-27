@@ -1,6 +1,5 @@
 from job.JobStore import JobStore
 from util import SystemTime
-from alarm.AlarmManagerService import AlarmManagerService
 class JobSchedulerService:
     def __init__(self):
         self.mDeliveryNum = 0
@@ -9,10 +8,6 @@ class JobSchedulerService:
     # 得到总交付数
     def getDeliveryNum(self):
         return self.mDeliveryNum
-
-    # 设置系统时间，并交付任务
-    def setTime(self,job):
-        SystemTime.setCurrentTime(job.completedJobTimeElapsd)
 
     # job加入时的调度函数
     def schedule(self,j):

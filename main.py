@@ -46,10 +46,18 @@ def sort_alarm_job(alarms, jobs):
     return tasks
 
 
-def delivery_tasks(tasks, alarmManagerService):
+def delivery_tasks(tasks, alarmManagerService,jobSchedulerService):
     for task in tasks:
         if isinstance(task, Alarm):
+            # 系统时间移至当前task进入时间
+            SystemTime.setCurrentTime(task.enqueueTime)
             alarmManagerService.set(task)
+            jobSchedulerService.deliveryJob()
+        else:
+            # 系统时间移至当前task进入时间
+            SystemTime.setCurrentTime(task.completedJobTimeElapsd)
+            alarmManagerService.deliveryAlarm(task)
+            jobSchedulerService.schedule(task)
 
 # 打印输出alarm的基本信息
 def dump_alarm_situation(alarms):
@@ -111,7 +119,7 @@ if __name__ == '__main__':
         delivery_time_delay(mAlarm)
     dump_alarm_situation(mAlarm)
     mTask = sort_alarm_job(mAlarm, mJob)
-    delivery_tasks(mTask,alarmService)
+    delivery_tasks(mTask,alarmService,jobService)
     dump_task_delivery_situation(alarmService,jobService)
 
 

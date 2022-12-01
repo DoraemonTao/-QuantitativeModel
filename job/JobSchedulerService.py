@@ -5,13 +5,12 @@ class JobSchedulerService:
         self.mDeliveryNum = 0
         self.mJobs = JobStore()
 
-    # 得到总交付数
-    def getDeliveryNum(self):
-        return self.mDeliveryNum
-
     # job加入时的调度函数
     def schedule(self,j):
+        self.deliveryJob()
         self.startTackingJobLocked(j)
+        # TODO: alarm and job aglin
+
 
     # 交付满足约束条件的alarm
     def deliveryJob(self):
@@ -27,7 +26,12 @@ class JobSchedulerService:
         alljobs = self.mJobs.mJobSet.getAllJobs()
         for job in alljobs:
             # 满足时间约束
-            if job.completedJobTimeElapsd > time:
+            if job.completedJobTimeElapsd <= time:
                 self.mJobs.remove(job)
                 delivery_num += 1
         return delivery_num
+
+        # 得到总交付数
+
+    def getDeliveryNum(self):
+        return self.mDeliveryNum

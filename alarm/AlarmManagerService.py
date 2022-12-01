@@ -8,8 +8,10 @@ import random
 
 
 class AlarmManagerService:
-    def __init__(self):
-        if DELIVERY_TIME_CHANGE:
+    def __init__(self,DELIVERY_TIME_CHANGE=False):
+        self.DELIVERY_TIME_CHANGE = DELIVERY_TIME_CHANGE
+        # Whether apply align policy
+        if self.DELIVERY_TIME_CHANGE:
             self.mAlarmStore = OptiBatchedAlarmStore()
         else:
             self.mAlarmStore = BatchingAlarmStore()
@@ -17,6 +19,8 @@ class AlarmManagerService:
         self.mNextWakeFromIdle = None
         self.mDeliveryNum = 0
         self.mWakeupNum = 0
+        self.alarm_job_align_num = 0
+
 
     def getDeliveryNum(self) -> int:
         """
@@ -98,6 +102,12 @@ class AlarmManagerService:
         while self.mAlarmStore.getNextDeliveryTime() < time:
             self.mAlarmStore.mAlarmBatches.removeBatch(0)
             self.mNextWakeFromIdle = self.mAlarmStore.getNextWakeFromIdleAlarm()
+
+    # 找到合适的batch，将deliveryTime置为job的completedTime
+    def align(self,job):
+        if self.mAlarmStore.setSuitableBatch(job):
+            self.alarm_job_align_num += 1
+
 
 # 测试用
 if __name__ == '__main__':

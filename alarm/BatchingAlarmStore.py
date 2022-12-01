@@ -1,4 +1,5 @@
 from alarm.AlarmManager import *
+from util.Constant import *
 
 # 对齐模块中alarm的数据结构
 class BatchingAlarmStore:
@@ -61,7 +62,8 @@ class BatchingAlarmStore:
 
     # 将alarm插入至合适的batch中
     def insertAndBatchAlarm(self, alarm):
-        whichBatch = self.attemptCoalesce(alarm.getWhenElapsed(),alarm.getMaxWhenElapsed()) if (alarm.flags & FLAG_STANDALONE != 0) else -1
+        whichBatch = -1 if (alarm.flags & FLAG_STANDALONE != 0) \
+            else self.attemptCoalesce(alarm.getWhenElapsed(),alarm.getMaxWhenElapsed())
         if whichBatch < 0:
             self.addBatch(self.mAlarmBatches, Batch(alarm))
         else:
@@ -75,6 +77,7 @@ class BatchingAlarmStore:
         if len(list) == 0:
             list.append(newBatch)
         else:
+            # index = self.binarySearch(list, newBatch)
             index = self.binarySearch(list, newBatch,0,len(list)-1)
             list.insert(index, newBatch)
 
@@ -87,16 +90,21 @@ class BatchingAlarmStore:
             else:
                 return self.binarySearch(list, newBatch, mid + 1, r)
         else:
-            return r
+            return l
+    # def binarySearch(self, list, newBatch):
+    #     for i in range(len(list)):
+    #         if newBatch.mStart < list[i].mStart:
+    #             return i
+    #     return len(list)
+
 
     # 返回对应的batch索引，-1表示未找到
     def attemptCoalesce(self, whenElapsed, maxWhen):
         n = len(self.mAlarmBatches)
         for i in range(n):
             b = self.mAlarmBatches[i]
-            if b.canHold(whenElapsed, maxWhen):
+            if (b.mFlags & FLAG_STANDALONE == 0) and b.canHold(whenElapsed, maxWhen):
                 return i
-
         return -1
 
     # 去除当前时间触发的alarm
@@ -131,6 +139,18 @@ class BatchingAlarmStore:
         for batch in oldBatches:
             for i in range(len(batch)):
                 self.insertAndBatchAlarm(batch[i])
+
+    # 找到合适的batch，并将执行时间设置为jobTime
+    def setSuitableBatch(self,job):
+        whichBatch = self.attemptCoalesce(job.completedJobTimeElapsd, job.completedJobTimeElapsd)
+        if whichBatch < 0:
+            return False
+        else:
+            batch = self.mAlarmBatches[whichBatch]
+            if batch.setExactTime(job.completedJobTimeElapsd):
+                self.mAlarmBatches.pop(whichBatch)
+                self.addBatch(self.mAlarmBatches, batch)
+                return True
 
 class Batch:
     # 新加入一个alarm时调用
@@ -177,10 +197,12 @@ class Batch:
         else:
             return r
 
+    # 设置精确时间，同job触发，只在taskAlign为1下有效
+    def setExactTime(self,time):
+        if self.mStart < time and self.mEnd > time:
+            self.mStart = time
+            self.mEnd = time
+            return True
+        return False
 
 
-# 测试用
-if __name__ == '__main__':
-    alarmstores = BatchingAlarmStore()
-    alarm = Alarm()
-    alarmstores.add(alarm)

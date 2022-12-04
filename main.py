@@ -191,6 +191,8 @@ def test_diff_enlarge_ratio(mTask):
     plt.legend()
     plt.show()
 
+# 得到硬件的调用次数
+def get_component_usage_num(mTask):
 
 
 if __name__ == '__main__':

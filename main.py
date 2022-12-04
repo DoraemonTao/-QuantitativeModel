@@ -1,4 +1,6 @@
 import sys
+import numpy as np
+import matplotlib.pyplot as plt
 
 from util.Parse import Parse
 from alarm.AlarmManagerService import *
@@ -107,6 +109,9 @@ def dump_task_delivery_situation(tasks,alarm_service,job_service):
     print("Align num: " + str(alarm_service.alarm_job_align_num))
     print("Align ratio: " + str((alarm_service.alarm_job_align_num) /
                                    (alarm_service.getDeliveryNum()+job_service.mDeliveryNum) * 100) +"%")
+    task_delivery_num = alarm_service.getDeliveryNum()+job_service.mDeliveryNum
+    wakeup_num = alarm_service.getWakeupNum()
+    return task_delivery_num,wakeup_num
 
 
 def get_task(path):
@@ -116,6 +121,8 @@ def get_task(path):
     mAlarm = mParseText.get_alarm_store()
     mJob = mParseText.get_job_store()
     return mAlarm, mJob
+
+
 
 # TODO: Test All Policy Target
 def test_all_policy(mTask):
@@ -127,7 +134,7 @@ def test_all_policy(mTask):
             alarmService = AlarmManagerService(DELIVERY_TIME_CHANGE=change)
             jobService = JobSchedulerService()
             # Whether enlarge alarm windowLength
-            delivery_time_delay(mTask, WINDOW_LENGTH_ENLARGE=delay)
+            delivery_time_delay(mTask,ratio=2, WINDOW_LENGTH_ENLARGE=delay)
             delivery_tasks(mTask, alarmService, jobService)
             if delay:
                 if change:
@@ -140,6 +147,51 @@ def test_all_policy(mTask):
                 else:
                     print("--------------------------- Native policy. --------------------------- \n")
             dump_task_delivery_situation(mTask,alarmService, jobService)
+
+def test_diff_enlarge_ratio(mTask):
+    ratios = np.linspace(1, 3, 20)
+    delivery_list = []
+    wakeup_list = []
+    align_delivery_list = []
+    align_wakeup_list = []
+    changes = [True,False]
+    i = 0
+
+    for ratio in ratios:
+        for change in changes:
+            alarmService = AlarmManagerService(DELIVERY_TIME_CHANGE=change)
+            jobService = JobSchedulerService()
+            # Whether enlarge alarm windowLength
+            delivery_time_delay(mTask, ratio=ratio, WINDOW_LENGTH_ENLARGE=True)
+            delivery_tasks(mTask, alarmService, jobService)
+            print("--------------------------- %.1f ratio --------------------------- \n" %(ratio))
+            task_delivery_num,wakeup_num=dump_task_delivery_situation(mTask, alarmService, jobService)
+            if change:
+                align_delivery_list.append(task_delivery_num)
+                align_wakeup_list.append(wakeup_num)
+            else:
+                delivery_list.append(task_delivery_num)
+                wakeup_list.append(wakeup_num)
+    for i in range(len(wakeup_list)-1):
+        wakeup_list[i+1] = wakeup_list[i+1] / wakeup_list[0]
+        delivery_list[i + 1] = delivery_list[i + 1] / delivery_list[0]
+        align_wakeup_list[i + 1] = align_wakeup_list[i + 1] / align_wakeup_list[0]
+        align_delivery_list[i + 1] = align_delivery_list[i + 1] / align_delivery_list[0]
+    wakeup_list[0] = 1
+    delivery_list[0] = 1
+    align_wakeup_list[0] = 1
+    align_delivery_list[0] = 1
+
+    # figure 1
+    plt.title("Different enlarge ratio")
+    plt.xlabel("Enlarge ratio")
+    plt.ylabel("Decrease ratio")
+    plt.plot(ratios,wakeup_list,label="Wakeup_ratio",marker = 'o')
+    plt.plot(ratios,delivery_list,label="Delivery_ratio",marker = 'o')
+    plt.legend()
+    plt.show()
+
+
 
 if __name__ == '__main__':
     mAlarm = []
@@ -157,6 +209,7 @@ if __name__ == '__main__':
     dump_alarm_situation(mAlarm)
     mTask = sort_alarm_job(mAlarm, mJob)
     test_all_policy(mTask)
+    # test_diff_enlarge_ratio(mTask)
 
 
 

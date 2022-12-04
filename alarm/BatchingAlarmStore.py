@@ -97,7 +97,6 @@ class BatchingAlarmStore:
     #             return i
     #     return len(list)
 
-
     # 返回对应的batch索引，-1表示未找到
     def attemptCoalesce(self, whenElapsed, maxWhen):
         n = len(self.mAlarmBatches)
@@ -106,6 +105,55 @@ class BatchingAlarmStore:
             if (b.mFlags & FLAG_STANDALONE == 0) and b.canHold(whenElapsed, maxWhen):
                 return i
         return -1
+
+    # 返回对应的batch索引，-1表示未找到
+    # def attemptCoalesce(self, whenElapsed, maxWhen):
+    #     n = len(self.mAlarmBatches)
+    #     # TODO: 时间重复率
+    #     batch_priority = []
+    #     for i in range(n):
+    #         priority = 0
+    #         b = self.mAlarmBatches[i]
+    #         if (b.mFlags & FLAG_STANDALONE == 0) and b.canHold(whenElapsed, maxWhen):
+    #             # 若窗口间隔等于0 则直接返回合适的batch
+    #             if whenElapsed  != maxWhen:
+    #                 if whenElapsed < b.mStart:
+    #                     if maxWhen < b.mEnd:
+    #                         overlap = (maxWhen - b.mStart)/ (maxWhen - whenElapsed)
+    #                     else:
+    #                         overlap = (b.mEnd - b.mStart) / (maxWhen - whenElapsed)
+    #                 else:
+    #                     if maxWhen < b.mEnd:
+    #                         overlap = (maxWhen - whenElapsed) / (maxWhen - whenElapsed)
+    #                     else:
+    #                         overlap = (b.mEnd - whenElapsed) / (maxWhen - whenElapsed)
+    #             else:
+    #                 return i
+    #             if b.hasWakeups:
+    #                 if overlap > 0.75:
+    #                     priority = 1
+    #                 elif overlap > 0.5:
+    #                     priority = 3
+    #                 elif overlap > 0.25:
+    #                     priority = 5
+    #                 else:
+    #                     priority = 7
+    #             else:
+    #                 if overlap > 0.75:
+    #                     priority = 2
+    #                 elif overlap > 0.5:
+    #                     priority = 4
+    #                 elif overlap > 0.25:
+    #                     priority = 6
+    #                 else:
+    #                     priority = 8
+    #         else:
+    #             priority = 9
+    #         batch_priority.append(priority)
+    #     min_priority = min(batch_priority)
+    #     if min_priority is 9:
+    #         return -1
+    #     return batch_priority.index(min_priority)
 
     # 去除当前时间触发的alarm
     def removePendingAlarms(self,nowElapsed):
@@ -120,8 +168,6 @@ class BatchingAlarmStore:
             self.mAlarmBatches.pop(0)
             deliveryNum += 1
         return deliveryNum , wakeupNum
-
-
 
     def updateAlarmDeliveries(self,fun):
         changed = False

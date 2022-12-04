@@ -19,6 +19,7 @@ class AlarmManagerService:
         self.mNextWakeFromIdle = None
         self.mDeliveryNum = 0
         self.mWakeupNum = 0
+        self.hardware_usage_num = 0
         self.alarm_job_align_num = 0
 
 
@@ -35,9 +36,10 @@ class AlarmManagerService:
     # 将当前时间移至当前，删除store中执行的batch
     def deliveryAlarm(self):
         # 删除当前时间前的batch
-        deliveryNum, wakeupNum = self.mAlarmStore.removePendingAlarms(SystemTime.getCurrentTime())
+        deliveryNum, wakeupNum, hardware_usage_num = self.mAlarmStore.removePendingAlarms(SystemTime.getCurrentTime())
         self.mDeliveryNum += deliveryNum
         self.mWakeupNum += wakeupNum
+        self.hardware_usage_num += hardware_usage_num
 
     # 调度alarm
     def set(self, a):

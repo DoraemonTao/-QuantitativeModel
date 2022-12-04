@@ -18,8 +18,9 @@ class Alarm:
 
     # 在策略下需要保证的执行时间
     mPolicyWhenElapsed = [0,0,0,0,0]
-    def __init__(self,type,when,requestedWhenElapsed,maxWhenElapsed,enqueueTime,elapsedRealtime,windowLength,interval
+    def __init__(self,uid,type,when,requestedWhenElapsed,maxWhenElapsed,enqueueTime,elapsedRealtime,windowLength,interval
         ,flags,pkgName,requester,app_standby):
+        self.uid = uid
         self.elapsedRealtime = elapsedRealtime;
         self.enqueueTime = enqueueTime
         self.type = type

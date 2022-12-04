@@ -48,23 +48,17 @@ def hc_query(u1, u2):
     return len2 / len1
 
 # 得到组件信息信息
-def get_component():
-    col_names = [i for i in range(0, 120)]
-    data_frame = pd.read_csv(input_file, header=None, names=col_names, lineterminator="\n")
-    return hardware_component()
+def get_uid_hardware():
+    return hardware_set
 
 if __name__ == '__main__':
-    # with open(input_file, 'rb') as f:
-    #     reader = csv.reader(f)
-    #     linenumber = 1
-    #     try:
-    #         for row in reader:
-    #             linenumber += 1
-    #     except Exception as e:
-    #         print(("Error line %d: %s" % (linenumber, str(type(e)))))
     col_names = [i for i in range(0, 120)]
     data_frame = pd.read_csv(input_file, header=None, names=col_names, lineterminator="\n")
     hardware_component()
     print(hc_query(10102, 1000))
 
+
+col_names = [i for i in range(0, 120)]
+data_frame = pd.read_csv(input_file, header=None, names=col_names, lineterminator="\n")
+hardware_set=hardware_component()
 

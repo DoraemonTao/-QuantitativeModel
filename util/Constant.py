@@ -42,5 +42,8 @@ DELAY_PERCENTAGE = 0.96
 # alarm与job的对齐
 TASK_ALGIN = True
 
+# hardware set
+HARDWARE_SET_PRIORITY = False
+
 
 

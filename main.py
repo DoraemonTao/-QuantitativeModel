@@ -1,8 +1,6 @@
 import sys
 import numpy as np
 import matplotlib.pyplot as plt
-
-from util.Parse import Parse
 from alarm.AlarmManagerService import *
 from job.JobSchedulerService import *
 from util.strategy import *
@@ -96,15 +94,13 @@ def dump_job_situation(jobs):
 # 打印输出指标的信息
 def dump_task_delivery_situation(tasks,alarm_service,job_service):
     print("-------------Alarm-------------")
-    print("Total tasks num: " + str(alarm_service.mAlarmStore.mNum) + "\n")
-    print("Total delivery num: " + str(alarm_service.getDeliveryNum()) + "\n")
     print("Wakeup num: "+ str(alarm_service.getWakeupNum()))
-    print("-------------Job-------------")
-    print("Total delivery num: " + str(job_service.mDeliveryNum) + "\n")
+    print("-------------Hardware-------------")
+    print("Total hardware num: " + str(job_service.mHardwareUsage+alarm_service.hardware_usage_num) + "\n")
     print("------------Tasks------------")
     print("Tasks num: " + str(len(tasks)))
-    print("Tasks delivery num: " + str(alarm_service.getDeliveryNum()+job_service.mDeliveryNum))
-    print("Decrease ratio: " + str((len(tasks)-alarm_service.getDeliveryNum()-job_service.mDeliveryNum) /
+    print("Tasks delivery num: " + str(alarm_service.getDeliveryNum()+job_service.mDeliveryNum-alarm_service.alarm_job_align_num))
+    print("Decrease ratio: " + str((len(tasks)-alarm_service.getDeliveryNum()-job_service.mDeliveryNum+alarm_service.alarm_job_align_num) /
                                 (len(tasks)) * 100) + "%\n")
     print("Align num: " + str(alarm_service.alarm_job_align_num))
     print("Align ratio: " + str((alarm_service.alarm_job_align_num) /
@@ -191,9 +187,14 @@ def test_diff_enlarge_ratio(mTask):
     plt.legend()
     plt.show()
 
-# 得到硬件的调用次数
-def get_component_usage_num(mTask):
-
+# 得到所有硬件的调用次数
+def get_hardware_usage_num(mTask,hardware_list):
+    num = 0
+    for task in mTask:
+        uid = task.uid
+        hardware = hardware_list[uid]
+        num += len(hardware)
+    return num
 
 if __name__ == '__main__':
     mAlarm = []

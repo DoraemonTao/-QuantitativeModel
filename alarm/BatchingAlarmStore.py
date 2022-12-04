@@ -2,6 +2,9 @@ from alarm.AlarmManager import *
 from util.Constant import *
 
 # 对齐模块中alarm的数据结构
+from util.bs_csv import get_uid_hardware
+
+
 class BatchingAlarmStore:
 
 
@@ -109,7 +112,7 @@ class BatchingAlarmStore:
     # 返回对应的batch索引，-1表示未找到
     def attemptCoalesce(self, whenElapsed, maxWhen):
         n = len(self.mAlarmBatches)
-        # TODO: 时间重复率
+        # 时间重复率
         batch_priority = []
         for i in range(n):
             priority = 0
@@ -159,15 +162,17 @@ class BatchingAlarmStore:
     def removePendingAlarms(self,nowElapsed):
         deliveryNum = 0
         wakeupNum = 0
+        hardware_usages_num = 0
         while len(self.mAlarmBatches)>0:
             batch = self.mAlarmBatches[0]
             if batch.mStart > nowElapsed:
                 break
             if batch.hasWakeups():
                 wakeupNum += 1
+            hardware_usages_num += len(batch.hardware_set)
             self.mAlarmBatches.pop(0)
             deliveryNum += 1
-        return deliveryNum , wakeupNum
+        return deliveryNum , wakeupNum, hardware_usages_num
 
     def updateAlarmDeliveries(self,fun):
         changed = False
@@ -207,6 +212,10 @@ class Batch:
         self.mFlags = seed.flags
         self.mAlarms.append(seed)
 
+        # 非原生，用于计算硬件调用次数
+        uid_hardware = get_uid_hardware()
+        self.hardware_set = uid_hardware[seed.uid]
+
     def get(self, index):
         return self.mAlarms[index]
 
@@ -231,6 +240,12 @@ class Batch:
             newStart = True
         if alarm.getMaxWhenElapsed() < self.mEnd:
             self.mEnd = alarm.getMaxWhenElapsed()
+
+        # 添加硬件组
+        for hardware in get_uid_hardware()[alarm.uid]:
+            if hardware not in self.hardware_set:
+                self.hardware_set.append(hardware)
+
         return newStart
 
     def binarySearch(self, mAlarms, alarm, l, r):

@@ -4,8 +4,8 @@ import pandas as pd
 import ast
 
 # input_file = '../data/batterystats.csv'
-input_file = '../data/batterystats.csv'
-output_file = '../data/op.csv'
+input_file = 'data/batterystats.csv'
+output_file = 'data/op.csv'
 dict_uid = {}
 stop_item = ['vers', 'uid', 'apk', 'wua', 'st', 'wl', 'awl', 'sy', 'jb', 'jbc', 'jbd', 'wr', 'pwi']
 
@@ -59,6 +59,6 @@ if __name__ == '__main__':
 
 
 col_names = [i for i in range(0, 120)]
-data_frame = pd.read_csv(input_file, header=None, names=col_names, lineterminator="\n")
+data_frame = pd.read_csv(input_file, header=None, names=col_names, lineterminator="\n",encoding="UTF16")
 hardware_set=hardware_component()
 

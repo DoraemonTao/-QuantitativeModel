@@ -109,6 +109,7 @@ class AlarmManagerService:
     def align(self,job):
         if self.mAlarmStore.setSuitableBatch(job):
             self.alarm_job_align_num += 1
+            return True
 
 
 # 测试用

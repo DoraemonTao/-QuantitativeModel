@@ -34,7 +34,7 @@ class JobSchedulerService:
         for job in alljobs:
             # 满足时间约束
             if job.completedJobTimeElapsd <= time:
-                hardware_usage += len(get_uid_hardware()[job.uid])
+                hardware_usage += len(get_uid_hardware().get(job.callingUid,[]))
                 self.mJobs.remove(job)
                 delivery_num += 1
         return delivery_num,hardware_usage

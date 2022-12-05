@@ -1,6 +1,7 @@
 import sys
 import numpy as np
 import matplotlib.pyplot as plt
+from util import *
 from alarm.AlarmManagerService import *
 from job.JobSchedulerService import *
 from util.strategy import *
@@ -51,8 +52,8 @@ def delivery_tasks(tasks, alarmManagerService,jobSchedulerService):
             # 系统时间移至当前task进入时间
             SystemTime.setCurrentTime(task.completedJobTimeElapsd)
             alarmManagerService.deliveryAlarm()
-            alarmManagerService.align(task)
-            jobSchedulerService.schedule(task)
+            if not alarmManagerService.align(task):
+                jobSchedulerService.schedule(task)
     SystemTime.setCurrentTime(sys.maxsize)
     alarmManagerService.deliveryAlarm()
     jobSchedulerService.deliveryJob()
@@ -92,21 +93,27 @@ def dump_job_situation(jobs):
     pass
 
 # 打印输出指标的信息
-def dump_task_delivery_situation(tasks,alarm_service,job_service):
+def dump_task_delivery_situation(tasks,alarm_service,job_service,origin):
+    task_num = len(tasks)
+    wakeup_num = alarm_service.getWakeupNum()
+    hardware_usage_num = job_service.mHardwareUsage+alarm_service.hardware_usage_num
+    task_delivery_num = alarm_service.getDeliveryNum() + job_service.mDeliveryNum - alarm_service.alarm_job_align_num
     print("-------------Alarm-------------")
-    print("Wakeup num: "+ str(alarm_service.getWakeupNum()))
+    print("Wakeup num: "+ str(wakeup_num))
+    print("Wakeup num decrease ratio: %.2f" %((origin['wakeup_num'] - wakeup_num) / origin['wakeup_num'] * 100) +"%\n")
     print("-------------Hardware-------------")
-    print("Total hardware num: " + str(job_service.mHardwareUsage+alarm_service.hardware_usage_num) + "\n")
+    print("Total hardware num: %s" %(hardware_usage_num) )
+    print("Task delivery decrease ratio: %.2f" %((origin['hardware_num'] - hardware_usage_num) /
+                                                 origin['hardware_num'] * 100)+"%\n")
     print("------------Tasks------------")
-    print("Tasks num: " + str(len(tasks)))
-    print("Tasks delivery num: " + str(alarm_service.getDeliveryNum()+job_service.mDeliveryNum-alarm_service.alarm_job_align_num))
-    print("Decrease ratio: " + str((len(tasks)-alarm_service.getDeliveryNum()-job_service.mDeliveryNum+alarm_service.alarm_job_align_num) /
-                                (len(tasks)) * 100) + "%\n")
+    print("Tasks num: " + str(task_num))
+    print("Tasks delivery num: " + str(task_delivery_num))
+    print("Task delivery decrease ratio: %.2f" %((origin['task_delivery_num']-task_delivery_num) /
+                                (origin['task_delivery_num']) * 100) +"%\n")
     print("Align num: " + str(alarm_service.alarm_job_align_num))
     print("Align ratio: " + str((alarm_service.alarm_job_align_num) /
-                                   (alarm_service.getDeliveryNum()+job_service.mDeliveryNum) * 100) +"%")
-    task_delivery_num = alarm_service.getDeliveryNum()+job_service.mDeliveryNum
-    wakeup_num = alarm_service.getWakeupNum()
+                                   (alarm_service.getDeliveryNum()+job_service.mDeliveryNum) * 100) )
+
     return task_delivery_num,wakeup_num
 
 
@@ -124,6 +131,8 @@ def get_task(path):
 def test_all_policy(mTask):
     CHANGE_POLICY = [False,True]
     DELAY_POLICY = [False,True]
+    # 原生数据
+    origin_data = {}
     for delay in DELAY_POLICY:
         for change in CHANGE_POLICY:
             # Whether apply align policy
@@ -142,7 +151,10 @@ def test_all_policy(mTask):
                     print("--------------------------- Apply align policy. ---------------------------\n")
                 else:
                     print("--------------------------- Native policy. --------------------------- \n")
-            dump_task_delivery_situation(mTask,alarmService, jobService)
+                    origin_data['wakeup_num'] = alarmService.getWakeupNum()
+                    origin_data['hardware_num'] = jobService.mHardwareUsage + alarmService.hardware_usage_num
+                    origin_data['task_delivery_num'] = alarmService.mDeliveryNum + jobService.mDeliveryNum - alarmService.alarm_job_align_num
+            dump_task_delivery_situation(mTask,alarmService, jobService,origin_data)
 
 def test_diff_enlarge_ratio(mTask):
     ratios = np.linspace(1, 3, 20)

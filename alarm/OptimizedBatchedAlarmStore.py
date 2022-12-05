@@ -16,14 +16,17 @@ class OptiBatchedAlarmStore(BatchingAlarmStore):
     def removePendingAlarms(self, nowElapsed):
         deliveryNum = 0
         wakeupNum = 0
+        hardware_usages_num = 0
         while len(self.mAlarmBatches) > 0:
             batch = self.mAlarmBatches[0]
             if batch.mEnd > nowElapsed:
                 break
             if batch.hasWakeups():
                 wakeupNum += 1
+            if batch.hardware_set is not None:
+                hardware_usages_num += len(batch.hardware_set)
             self.mAlarmBatches.pop(0)
             deliveryNum += 1
-        return deliveryNum, wakeupNum
+        return deliveryNum, wakeupNum, hardware_usages_num
 
 

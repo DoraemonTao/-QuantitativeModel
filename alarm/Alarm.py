@@ -30,7 +30,6 @@ class Alarm:
         self.repeatInterval = interval
         self.flags = flags
         self.mPackageName = pkgName
-        self.wakeup = type == "RTC_WAKEUP" or type == "ELAPSED_REALTIME_WAKEUP"
         self.mMaxWhenElapsed = maxWhenElapsed
         self.mPolicyWhenElapsed[self.REQUESTER_POLICY_INDEX] = requester
         self.mPolicyWhenElapsed[self.APP_STANDBY_POLICY_INDEX] = app_standby

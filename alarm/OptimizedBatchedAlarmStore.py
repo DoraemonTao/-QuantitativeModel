@@ -84,14 +84,14 @@ class OptiBatchedAlarmStore(BatchingAlarmStore):
         priority = 0
         # config
         overlap_step = 3
-        hardware_step = 2
+        hardware_step = 3
 
         # 时间重复率
         # 若窗口间隔等于0 则直接返回合适的batch
         if self.TIME_OVERLAP_PRIORITY:
             overlap = self.get_overlap(b, whenElapsed, maxWhen)
             overlap_thresholds = np.linspace(1, 0, overlap_step)
-            if b.hasWakeups:
+            if b.hasWakeups():
                 i = 1
                 for threshold in overlap_thresholds:
                     if overlap >= threshold:
@@ -103,6 +103,7 @@ class OptiBatchedAlarmStore(BatchingAlarmStore):
                 for threshold in overlap_thresholds:
                     if overlap >= threshold:
                         priority += i
+                        break
                     i = i + hardware_step
         # 硬件优先级
         if self.HARDWARE_SET_PRIORITY:

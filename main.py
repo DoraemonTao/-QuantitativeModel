@@ -64,6 +64,7 @@ def dump_alarm_situation(alarms):
     repeat_num = 0
     wakeup_num = 0
     flex_wakeup_num = 0
+    flex_nowakeup_num = 0
     exact_num = 0
     error_num = 0
     for alarm in alarms:
@@ -74,6 +75,8 @@ def dump_alarm_situation(alarms):
             flex_num += 1
             if alarm.wakeup:
                 flex_wakeup_num += 1
+            else:
+                flex_nowakeup_num += 1
         if alarm.repeatInterval != 0:
             repeat_num += 1
         if alarm.flags & AlarmManager.FLAG_STANDALONE !=0:
@@ -84,6 +87,7 @@ def dump_alarm_situation(alarms):
     print("周期性alarm占比：" + str(repeat_num/alarms_num) + "\n")
     print("wakeup型alarm占比：" + str(wakeup_num / alarms_num) + "\n")
     print("wakeup&可延长型alarm占比：" + str(flex_wakeup_num/ alarms_num) + "\n")
+    print("非wakeup&可延长型alarm占比：" + str(flex_nowakeup_num / alarms_num) + "\n")
     print("不可对齐的alarm占比：" + str(exact_num / alarms_num) + "\n")
     print("加入batch无法对齐的alarm占比：" + str(error_num / alarms_num) + "\n")
 

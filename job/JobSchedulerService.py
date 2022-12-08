@@ -39,7 +39,6 @@ class JobSchedulerService:
                 delivery_num += 1
         return delivery_num,hardware_usage
 
-        # 得到总交付数
-
+     # 得到总交付数
     def getDeliveryNum(self):
         return self.mDeliveryNum

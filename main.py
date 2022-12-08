@@ -13,7 +13,6 @@ def parse_txt(BatteryState):
     f.close()
     return fileContent
 
-
 # 将job和alarm按时间统一排序
 def sort_alarm_job(alarms, jobs):
     tasks = []
@@ -103,7 +102,7 @@ def dump_task_delivery_situation(tasks,alarm_service,job_service,origin):
     print("Wakeup num decrease ratio: %.2f" %((origin['wakeup_num'] - wakeup_num) / origin['wakeup_num'] * 100) +"%\n")
     print("-------------Hardware-------------")
     print("Total hardware num: %s" %(hardware_usage_num) )
-    print("Task delivery decrease ratio: %.2f" %((origin['hardware_num'] - hardware_usage_num) /
+    print("Hardware decrease ratio: %.2f" %((origin['hardware_num'] - hardware_usage_num) /
                                                  origin['hardware_num'] * 100)+"%\n")
     print("------------Tasks------------")
     print("Tasks num: " + str(task_num))

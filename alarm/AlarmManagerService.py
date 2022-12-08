@@ -8,13 +8,17 @@ import random
 
 
 class AlarmManagerService:
-    def __init__(self,DELIVERY_TIME_CHANGE=False):
+    def __init__(self,DELIVERY_TIME_CHANGE=False,TIME_OVERLAP_PRIORITY=True,HARDWARE_SET_PRIORITY=False):
+        # Init strategy config
         self.DELIVERY_TIME_CHANGE = DELIVERY_TIME_CHANGE
+
         # Whether apply align policy
         if self.DELIVERY_TIME_CHANGE:
-            self.mAlarmStore = OptiBatchedAlarmStore()
+            self.mAlarmStore = OptiBatchedAlarmStore(TIME_OVERLAP_PRIORITY,HARDWARE_SET_PRIORITY)
         else:
-            self.mAlarmStore = BatchingAlarmStore()
+            self.mAlarmStore = BatchingAlarmStore(TIME_OVERLAP_PRIORITY,HARDWARE_SET_PRIORITY)
+
+        # Init metrics
         self.mPendingIdleUntil = None
         self.mNextWakeFromIdle = None
         self.mDeliveryNum = 0
@@ -107,9 +111,12 @@ class AlarmManagerService:
 
     # 找到合适的batch，将deliveryTime置为job的completedTime
     def align(self,job):
+        if not self.DELIVERY_TIME_CHANGE:
+            return False
         if self.mAlarmStore.setSuitableBatch(job):
             self.alarm_job_align_num += 1
             return True
+        return False
 
 
 # 测试用

@@ -8,7 +8,9 @@ from util.bs_csv import get_uid_hardware
 class BatchingAlarmStore:
 
 
-    def __init__(self):
+    def __init__(self,TIME_OVERLAP_PRIORITY,HARDWARE_SET_PRIORITY):
+        self.TIME_OVERLAP_PRIORITY = TIME_OVERLAP_PRIORITY
+        self.HARDWARE_SET_PRIORITY = HARDWARE_SET_PRIORITY
         self.mAlarmBatches = []
         self.mNum = 0
         self.deliveryBatchNum = 0
@@ -66,7 +68,7 @@ class BatchingAlarmStore:
     # 将alarm插入至合适的batch中
     def insertAndBatchAlarm(self, alarm):
         whichBatch = -1 if (alarm.flags & FLAG_STANDALONE != 0) \
-            else self.attemptCoalesce(alarm.getWhenElapsed(),alarm.getMaxWhenElapsed())
+            else self.attemptCoalesce(alarm.getWhenElapsed(),alarm.getMaxWhenElapsed(),alarm.uid)
         if whichBatch < 0:
             self.addBatch(self.mAlarmBatches, Batch(alarm))
         else:
@@ -101,70 +103,70 @@ class BatchingAlarmStore:
     #     return len(list)
 
     # 返回对应的batch索引，-1表示未找到
-    # def attemptCoalesce(self, whenElapsed, maxWhen):
-    #     n = len(self.mAlarmBatches)
-    #     for i in range(n):
-    #         b = self.mAlarmBatches[i]
-    #         if (b.mFlags & FLAG_STANDALONE == 0) and b.canHold(whenElapsed, maxWhen):
-    #             return i
-    #     return -1
+    def attemptCoalesce(self, whenElapsed, maxWhen,uid):
+        n = len(self.mAlarmBatches)
+        for i in range(n):
+            b = self.mAlarmBatches[i]
+            if (b.mFlags & FLAG_STANDALONE == 0) and b.canHold(whenElapsed, maxWhen):
+                return i
+        return -1
 
     # 返回对应的batch索引，-1表示未找到
-    def attemptCoalesce(self, whenElapsed, maxWhen):
-        if TIME_OVERLAP_PRIORITY:
-            n = len(self.mAlarmBatches)
-            # 时间重复率
-            batch_priority = []
-            for i in range(n):
-                priority = 0
-                b = self.mAlarmBatches[i]
-                if (b.mFlags & FLAG_STANDALONE == 0) and b.canHold(whenElapsed, maxWhen):
-                    # 若窗口间隔等于0 则直接返回合适的batch
-                    if whenElapsed  != maxWhen:
-                        if whenElapsed < b.mStart:
-                            if maxWhen < b.mEnd:
-                                overlap = (maxWhen - b.mStart)/ (b.mEnd - b.mStart)
-                            else:
-                                overlap = (b.mEnd - b.mStart) / (b.mEnd - b.mStart)
-                        else:
-                            if maxWhen < b.mEnd:
-                                overlap = (maxWhen - whenElapsed) / (b.mEnd - b.mStart)
-                            else:
-                                overlap = (b.mEnd - whenElapsed) / (b.mEnd - b.mStart)
-                    else:
-                        overlap = 0
-                    if b.hasWakeups:
-                        if overlap > 0.75:
-                            priority = 1
-                        elif overlap > 0.5:
-                            priority = 2
-                        elif overlap > 0.25:
-                            priority = 3
-                        else:
-                            priority = 7
-                    else:
-                        if overlap > 0.75:
-                            priority = 4
-                        elif overlap > 0.5:
-                            priority = 5
-                        elif overlap > 0.25:
-                            priority = 6
-                        else:
-                            priority = 8
-                else:
-                    priority = 9
-                batch_priority.append(priority)
-            min_priority = min(batch_priority)
-            if min_priority == 9:
-                return -1
-            return batch_priority.index(min_priority)
-        else:
-            n = len(self.mAlarmBatches)
-            for i in range(n):
-                b = self.mAlarmBatches[i]
-                if (b.mFlags & FLAG_STANDALONE == 0) and b.canHold(whenElapsed, maxWhen):
-                    return i
-            return -1
+    # def attemptCoalesce(self, whenElapsed, maxWhen):
+    #     if TIME_OVERLAP_PRIORITY:
+    #         n = len(self.mAlarmBatches)
+    #         # 时间重复率
+    #         batch_priority = []
+    #         for i in range(n):
+    #             priority = 0
+    #             b = self.mAlarmBatches[i]
+    #             if (b.mFlags & FLAG_STANDALONE == 0) and b.canHold(whenElapsed, maxWhen):
+    #                 # 若窗口间隔等于0 则直接返回合适的batch
+    #                 if whenElapsed  != maxWhen:
+    #                     if whenElapsed < b.mStart:
+    #                         if maxWhen < b.mEnd:
+    #                             overlap = (maxWhen - b.mStart)/ (b.mEnd - b.mStart)
+    #                         else:
+    #                             overlap = (b.mEnd - b.mStart) / (b.mEnd - b.mStart)
+    #                     else:
+    #                         if maxWhen < b.mEnd:
+    #                             overlap = (maxWhen - whenElapsed) / (b.mEnd - b.mStart)
+    #                         else:
+    #                             overlap = (b.mEnd - whenElapsed) / (b.mEnd - b.mStart)
+    #                 else:
+    #                     overlap = 0
+    #                 if b.hasWakeups:
+    #                     if overlap > 0.75:
+    #                         priority = 1
+    #                     elif overlap > 0.5:
+    #                         priority = 2
+    #                     elif overlap > 0.25:
+    #                         priority = 3
+    #                     else:
+    #                         priority = 7
+    #                 else:
+    #                     if overlap > 0.75:
+    #                         priority = 4
+    #                     elif overlap > 0.5:
+    #                         priority = 5
+    #                     elif overlap > 0.25:
+    #                         priority = 6
+    #                     else:
+    #                         priority = 8
+    #             else:
+    #                 priority = 9
+    #             batch_priority.append(priority)
+    #         min_priority = min(batch_priority)
+    #         if min_priority == 9:
+    #             return -1
+    #         return batch_priority.index(min_priority)
+    #     else:
+    #         n = len(self.mAlarmBatches)
+    #         for i in range(n):
+    #             b = self.mAlarmBatches[i]
+    #             if (b.mFlags & FLAG_STANDALONE == 0) and b.canHold(whenElapsed, maxWhen):
+    #                 return i
+    #         return -1
 
     # 去除当前时间触发的alarm
     def removePendingAlarms(self,nowElapsed):
@@ -200,20 +202,7 @@ class BatchingAlarmStore:
             for i in range(len(batch)):
                 self.insertAndBatchAlarm(batch[i])
 
-    # 找到合适的batch，并将执行时间设置为jobTime
-    def setSuitableBatch(self,job):
-        whichBatch = self.attemptCoalesce(job.completedJobTimeElapsd, job.completedJobTimeElapsd)
-        if whichBatch < 0:
-            return False
-        else:
-            batch = self.mAlarmBatches[whichBatch]
-            if batch.setExactTime(job.completedJobTimeElapsd):
-                for hardware in get_uid_hardware().get(job.callingUid, []):
-                    if hardware not in batch.hardware_set:
-                        batch.hardware_set.append(hardware)
-                self.mAlarmBatches.pop(whichBatch)
-                self.addBatch(self.mAlarmBatches, batch)
-                return True
+
 
 class Batch:
     # 新加入一个alarm时调用
@@ -225,8 +214,8 @@ class Batch:
         self.mAlarms.append(seed)
 
         # 非原生，用于计算硬件调用次数
-        uid_hardware = get_uid_hardware()
-        self.hardware_set = uid_hardware.get(seed.uid,[])
+        hardware = get_uid_hardware().get(seed.uid, []).copy()
+        self.hardware_set = hardware
 
     def get(self, index):
         return self.mAlarms[index]
@@ -252,9 +241,9 @@ class Batch:
             newStart = True
         if alarm.getMaxWhenElapsed() < self.mEnd:
             self.mEnd = alarm.getMaxWhenElapsed()
-
+        self.mFlags |= alarm.flags
         # 添加硬件组
-        for hardware in get_uid_hardware().get(alarm.uid,[]):
+        for hardware in get_uid_hardware().get(alarm.uid,[]).copy():
             if hardware not in self.hardware_set:
                 self.hardware_set.append(hardware)
 

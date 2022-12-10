@@ -4,12 +4,10 @@ import numpy as np
 
 from alarm.AlarmManager import *
 from alarm.BatchingAlarmStore import BatchingAlarmStore
-from alarm.BatchingAlarmStore import Batch
-from util.Constant import *
 
 
 # 应用不同策略下的alarm对齐次数
-from util.bs_csv import get_uid_hardware, get_hardware_similarity
+from util.bs_csv import  hc_query_plus_prime, get_uid_hardware_time_set
 
 
 class OptiBatchedAlarmStore(BatchingAlarmStore):
@@ -73,9 +71,12 @@ class OptiBatchedAlarmStore(BatchingAlarmStore):
         else:
             batch = self.mAlarmBatches[whichBatch]
             if batch.setExactTime(job.completedJobTimeElapsd):
-                for hardware in get_uid_hardware().get(job.callingUid, []).copy():
-                    if hardware not in batch.hardware_set:
-                        batch.hardware_set.append(hardware)
+                for hardware in get_uid_hardware_time_set().get(job.callingUid, []).copy():
+                    if hardware[0] not in batch.hardware_set:
+                        batch.hardware_set[hardware[0]] = hardware[1]
+                    else:
+                        if hardware[1] > batch.hardware_set[hardware[0]]:
+                            batch.hardware_set[hardware[0]] = hardware[1]
                 self.mAlarmBatches.pop(whichBatch)
                 self.addBatch(self.mAlarmBatches, batch)
                 return True
@@ -108,7 +109,7 @@ class OptiBatchedAlarmStore(BatchingAlarmStore):
         # 硬件优先级
         if self.HARDWARE_SET_PRIORITY:
             i = 1
-            hardware_similarity = get_hardware_similarity(get_uid_hardware().get(uid,[]).copy(),b.hardware_set)
+            hardware_similarity = hc_query_plus_prime(get_uid_hardware_time_set().get(uid,[]).copy(),b.hardware_set)
             hardware_thresholds = np.linspace(1, 0, hardware_step)
             for threshold in hardware_thresholds:
                 if hardware_similarity >= threshold:

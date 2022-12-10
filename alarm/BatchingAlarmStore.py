@@ -1,8 +1,9 @@
+import numpy as np
+
 from alarm.AlarmManager import *
-from util.Constant import *
 
 # 对齐模块中alarm的数据结构
-from util.bs_csv import get_uid_hardware
+from util.bs_csv import  get_uid_hardware_time_set
 
 
 class BatchingAlarmStore:
@@ -214,8 +215,9 @@ class Batch:
         self.mAlarms.append(seed)
 
         # 非原生，用于计算硬件调用次数
-        hardware = get_uid_hardware().get(seed.uid, []).copy()
-        self.hardware_set = hardware
+        self.hardware_set = {}
+        for item in get_uid_hardware_time_set().get(seed.uid, []).copy():
+            self.hardware_set[item[0]] = item[1]
 
     def get(self, index):
         return self.mAlarms[index]
@@ -243,10 +245,12 @@ class Batch:
             self.mEnd = alarm.getMaxWhenElapsed()
         self.mFlags |= alarm.flags
         # 添加硬件组
-        for hardware in get_uid_hardware().get(alarm.uid,[]).copy():
-            if hardware not in self.hardware_set:
-                self.hardware_set.append(hardware)
-
+        for hardware in get_uid_hardware_time_set().get(alarm.uid,[]).copy():
+            if hardware[0] not in self.hardware_set:
+                self.hardware_set[hardware[0]] = hardware[1]
+            else:
+                if hardware[1] > self.hardware_set[hardware[0]]:
+                    self.hardware_set[hardware[0]] = hardware[1]
         return newStart
 
     def binarySearch(self, mAlarms, alarm, l, r):

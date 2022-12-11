@@ -226,7 +226,7 @@ if __name__ == '__main__':
     mJob.sort(key=lambda job: job.completedJobTimeElapsd)
     dump_alarm_situation(mAlarm)
     mTask = sort_alarm_job(mAlarm, mJob)
-    test_all_policy(mTask)
+    test_all_policy(mTask[500:10000])
     # test_diff_enlarge_ratio(mTask)
 
 

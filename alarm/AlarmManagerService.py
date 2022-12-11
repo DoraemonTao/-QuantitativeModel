@@ -8,7 +8,7 @@ import random
 
 
 class AlarmManagerService:
-    def __init__(self,DELIVERY_TIME_CHANGE=False,TIME_OVERLAP_PRIORITY=True,HARDWARE_SET_PRIORITY=True):
+    def __init__(self,DELIVERY_TIME_CHANGE=False,TIME_OVERLAP_PRIORITY=True,HARDWARE_SET_PRIORITY=False):
         # Init strategy config
         self.DELIVERY_TIME_CHANGE = DELIVERY_TIME_CHANGE
 

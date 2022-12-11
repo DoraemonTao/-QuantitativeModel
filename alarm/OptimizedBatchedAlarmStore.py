@@ -59,11 +59,23 @@ class OptiBatchedAlarmStore(BatchingAlarmStore):
                 else:
                     priority = sys.maxsize
                 batch_priority.append(priority)
-            min_priority = min(batch_priority)
+            if batch_priority == [] :
+                min_priority = sys.maxsize
+            else:
+                min_priority = min(batch_priority)
             if min_priority == sys.maxsize:
                 return -1
             return batch_priority.index(min_priority)
 
+    def binarySearch(self, list, newBatch, l, r):
+        if r >= l:
+            mid = int(l + (r - l) / 2)
+            if list[mid].mEnd > newBatch.mEnd:
+                return self.binarySearch(list, newBatch, l, mid - 1, )
+            else:
+                return self.binarySearch(list, newBatch, mid + 1, r)
+        else:
+            return l
 
     # 找到合适的batch，并将执行时间设置为jobTime
     def setSuitableBatch(self,job):
@@ -91,15 +103,15 @@ class OptiBatchedAlarmStore(BatchingAlarmStore):
         if self.TIME_OVERLAP_PRIORITY:
             overlap = self.get_overlap(b, whenElapsed, maxWhen)
             overlap_thresholds = np.linspace(1, 0, overlap_step)
-            if b.hasWakeups():
+            if not b.hasWakeups():
                 i = 1
                 for threshold in overlap_thresholds:
                     if overlap >= threshold:
                         priority += i
                         break
-                    i = i+hardware_step
+                    i = i+hardware_step+1
             else:
-                i = hardware_step*overlap_step + 1
+                i = (hardware_step + 1)*overlap_step
                 for threshold in overlap_thresholds:
                     if overlap >= threshold:
                         priority += i
@@ -107,7 +119,7 @@ class OptiBatchedAlarmStore(BatchingAlarmStore):
                     i = i + hardware_step
         # 硬件优先级
         if self.HARDWARE_SET_PRIORITY:
-            i = 1
+            i = 0
             hardware_similarity = get_hardware_similarity(get_uid_hardware().get(uid,[]).copy(),b.hardware_set)
             hardware_thresholds = np.linspace(1, 0, hardware_step)
             for threshold in hardware_thresholds:

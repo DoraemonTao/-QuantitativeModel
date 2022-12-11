@@ -4,13 +4,10 @@ import numpy as np
 
 from alarm.AlarmManager import *
 from alarm.BatchingAlarmStore import BatchingAlarmStore
-from alarm.BatchingAlarmStore import Batch
-from util.Constant import *
 
 
 # 应用不同策略下的alarm对齐次数
 from util.bs_csv import get_uid_hardware, get_hardware_similarity
-
 
 class OptiBatchedAlarmStore(BatchingAlarmStore):
 

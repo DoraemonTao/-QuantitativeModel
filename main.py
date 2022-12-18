@@ -7,6 +7,9 @@ from job.JobSchedulerService import *
 from util.strategy import *
 from util.ParseText import *
 
+from util.draw_figure import *
+
+# 将文件解析成输入流
 def parse_txt(BatteryState):
     f = open(BatteryState, encoding="utf-8")
     fileContent = f.readlines()
@@ -39,7 +42,7 @@ def sort_alarm_job(alarms, jobs):
                 nextJob = jobs.pop(0)
     return tasks
 
-
+# 递交task
 def delivery_tasks(tasks, alarmManagerService,jobSchedulerService):
     for task in tasks:
         if isinstance(task, Alarm):
@@ -58,8 +61,11 @@ def delivery_tasks(tasks, alarmManagerService,jobSchedulerService):
     jobSchedulerService.deliveryJob()
 
 # 打印输出alarm的基本信息
-def dump_alarm_situation(alarms):
-    alarms_num = len(alarms)
+def dump_alarm_situation(tasks):
+    tasks_num = len(tasks)
+    alarms_num = 0
+    jobs_num = 0
+    window_list = []
     flex_num = 0
     repeat_num = 0
     wakeup_num = 0
@@ -67,31 +73,37 @@ def dump_alarm_situation(alarms):
     flex_nowakeup_num = 0
     exact_num = 0
     error_num = 0
-    for alarm in alarms:
-        # is Wakeup?
-        if alarm.wakeup:
-            wakeup_num += 1
-        if alarm.windowLength != 0:
-            flex_num += 1
+    for alarm in tasks:
+        if isinstance(alarm, Alarm):
+            alarms_num += 1
+            # is Wakeup?
             if alarm.wakeup:
-                flex_wakeup_num += 1
-            else:
-                flex_nowakeup_num += 1
-        if alarm.repeatInterval != 0:
-            repeat_num += 1
-        if alarm.flags & AlarmManager.FLAG_STANDALONE !=0:
-            exact_num += 1
-        if alarm.flags & AlarmManager.FLAG_STANDALONE == 0 and alarm.windowLength == 0:
-            error_num += 1
-    print("可延长alarm占比："+str(flex_num/alarms_num)+"\n")
+                wakeup_num += 1
+            if alarm.windowLength != 0:
+                flex_num += 1
+                window_list.append(alarm.windowLength)
+                if alarm.wakeup:
+                    flex_wakeup_num += 1
+                else:
+                    flex_nowakeup_num += 1
+            if alarm.repeatInterval != 0:
+                repeat_num += 1
+            if alarm.flags & AlarmManager.FLAG_STANDALONE !=0:
+                exact_num += 1
+            if alarm.flags & AlarmManager.FLAG_STANDALONE == 0 and alarm.windowLength == 0:
+                error_num += 1
+        else:
+            jobs_num += 1
+    print("可延长alarm占比："+str(flex_num/tasks_num)+"\n")
     print("周期性alarm占比：" + str(repeat_num/alarms_num) + "\n")
     print("wakeup型alarm占比：" + str(wakeup_num / alarms_num) + "\n")
     print("wakeup&可延长型alarm占比：" + str(flex_wakeup_num/ alarms_num) + "\n")
     print("非wakeup&可延长型alarm占比：" + str(flex_nowakeup_num / alarms_num) + "\n")
     print("不可对齐的alarm占比：" + str(exact_num / alarms_num) + "\n")
     print("加入batch无法对齐的alarm占比：" + str(error_num / alarms_num) + "\n")
+    print("job占比：" + str(jobs_num) + "\n")
 
-
+# 暂未实现
 def dump_job_situation(jobs):
     pass
 
@@ -119,7 +131,7 @@ def dump_task_delivery_situation(tasks,alarm_service,job_service,origin):
 
     return task_delivery_num,wakeup_num
 
-
+# 从输入文件中解析得到alarm和job，统称为task
 def get_task(path):
     fileContent = parse_txt(path)
     mParseText = ParseText(fileContent)
@@ -130,7 +142,7 @@ def get_task(path):
 
 
 
-# TODO: Test All Policy Target
+# Test All Policy Target
 def test_all_policy(mTask):
     CHANGE_POLICY = [False,True]
     DELAY_POLICY = [False,True]
@@ -159,6 +171,7 @@ def test_all_policy(mTask):
                     origin_data['task_delivery_num'] = alarmService.mDeliveryNum + jobService.mDeliveryNum - alarmService.alarm_job_align_num
             dump_task_delivery_situation(mTask,alarmService, jobService,origin_data)
 
+# 测试不同延迟比例下的指标
 def test_diff_enlarge_ratio(mTask):
     ratios = np.linspace(1, 3, 20)
     delivery_list = []
@@ -202,6 +215,21 @@ def test_diff_enlarge_ratio(mTask):
     plt.legend()
     plt.show()
 
+# 单独测试对齐以及相似度策略
+def test_both_strategy(mTask):
+    alarmService = AlarmManagerService(DELIVERY_TIME_CHANGE=True)
+    jobService = JobSchedulerService()
+    # Whether enlarge alarm windowLength
+    delivery_time_delay(mTask, ratio=2, WINDOW_LENGTH_ENLARGE=True)
+    delivery_tasks(mTask, alarmService, jobService)
+    print("--------------------------- Native policy. --------------------------- \n")
+    origin_data = {}
+    origin_data['wakeup_num'] = alarmService.getWakeupNum()
+    origin_data['hardware_num'] = jobService.mHardwareUsage + alarmService.hardware_usage_num
+    origin_data[
+        'task_delivery_num'] = alarmService.mDeliveryNum + jobService.mDeliveryNum - alarmService.alarm_job_align_num
+    dump_task_delivery_situation(mTask, alarmService, jobService, origin_data)
+
 # 得到所有硬件的调用次数
 def get_hardware_usage_num(mTask,hardware_list):
     num = 0
@@ -224,9 +252,11 @@ if __name__ == '__main__':
     # 将alarm和job按照enqueueTime排序
     mAlarm.sort(key=lambda alarm: alarm.enqueueTime)
     mJob.sort(key=lambda job: job.completedJobTimeElapsd)
-    dump_alarm_situation(mAlarm)
     mTask = sort_alarm_job(mAlarm, mJob)
-    test_all_policy(mTask[500:10000])
+    plot_alarm_window(mTask)
+    test_all_policy(mTask[4000 : 8000])
+    dump_alarm_situation(mTask[8000: 12000])
+    # test_both_strategy(mTask[0:4000])
     # test_diff_enlarge_ratio(mTask)
 
 
